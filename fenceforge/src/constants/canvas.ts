@@ -1,0 +1,12 @@
+export const PIXELS_PER_FOOT = 20;
+export const DEFAULT_SNAP_FT = 1;
+export const DEFAULT_SNAP_PX = PIXELS_PER_FOOT * DEFAULT_SNAP_FT;
+export const CANVAS_BG = '#EDE9E1';
+export const GRID_COLOR = '#D5D0C8';
+export const GRID_MAJOR_COLOR = '#C0B8AE';
+export const GRADIENT_STRIP_WIDTH = 40;
+export const MAX_HISTORY = 60;
+export const GATE_POST_RADIUS = 5;
+export const SNAP_VERTEX_RADIUS = 12;
+export const MIN_ZOOM = 0.1;
+export const MAX_ZOOM = 12;

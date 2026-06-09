@@ -1,0 +1,234 @@
+import { useRef } from 'react';
+import { Group, Line, Circle, Arc, Text } from 'react-konva';
+import type Konva from 'konva';
+import type { Gate, FenceLine } from '../../types';
+import { FENCE_TYPES, getFenceColor } from '../../constants/fenceTypes';
+import { computeGateGeometry } from '../../utils/gateGeometry';
+
+interface Props {
+  gate: Gate;
+  fence: FenceLine | undefined;
+  isSelected: boolean;
+  onSelect: () => void;
+  updateGate?: (id: string, patch: Partial<Gate>) => void;
+  onBeforeEdit?: () => void;
+}
+
+/** Project (x,y) onto the nearest point on the fence polyline; returns segment index + t */
+function projectToFence(x: number, y: number, points: number[]) {
+  let bestDist = Infinity;
+  let best: { segIdx: number; t: number; px: number; py: number } | null = null;
+  for (let si = 0; si < points.length / 2 - 1; si++) {
+    const x1 = points[si * 2], y1 = points[si * 2 + 1];
+    const x2 = points[si * 2 + 2], y2 = points[si * 2 + 3];
+    const dx = x2 - x1, dy = y2 - y1;
+    const lenSq = dx * dx + dy * dy;
+    if (lenSq === 0) continue;
+    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lenSq));
+    const px = x1 + t * dx, py = y1 + t * dy;
+    const dist = Math.hypot(x - px, y - py);
+    if (dist < bestDist) { bestDist = dist; best = { segIdx: si, t, px, py }; }
+  }
+  return best;
+}
+
+export function GateElement({ gate, fence, isSelected, onSelect, updateGate, onBeforeEdit }: Props) {
+  const didPushHistory = useRef(false);
+  const wasDragged = useRef(false);
+
+  if (!fence) return null;
+
+  const geo = computeGateGeometry(gate, fence.points);
+  if (!geo) return null;
+
+  const def = FENCE_TYPES[gate.fenceType];
+  if (!def) return null;
+  // Gate panels take the color of the fence line they belong to
+  const fenceColor = getFenceColor(fence);
+  const color = isSelected ? '#FFD700' : fenceColor;
+  const postColor = isSelected ? '#FFD700' : '#5A4A3A';
+  const arcColor = '#888888';
+
+  const isDouble = gate.gateType === 'double-swing';
+  const canDrag = !!updateGate;
+
+  function handleDragStart() {
+    wasDragged.current = false;
+    if (!didPushHistory.current) {
+      onBeforeEdit?.();
+      didPushHistory.current = true;
+    }
+  }
+
+  function handleDragMove(e: Konva.KonvaEventObject<DragEvent>) {
+    if (!updateGate || !fence) return;
+    wasDragged.current = true;
+    const node = e.target as Konva.Group;
+    // Use the actual pointer position in world coords — avoids stale closure issues
+    // entirely (no dependence on gateCenterX/Y computed at render time)
+    const stage = node.getStage();
+    const pos = stage?.getRelativePointerPosition();
+    if (pos) {
+      const pt = projectToFence(pos.x, pos.y, fence.points);
+      if (pt) updateGate(gate.id, { segmentIndex: pt.segIdx, positionT: pt.t });
+    }
+    // Reset group back to origin every frame
+    node.position({ x: 0, y: 0 });
+  }
+
+  function handleDragEnd() {
+    didPushHistory.current = false;
+  }
+
+  function handleClick() {
+    if (!wasDragged.current) onSelect();
+    wasDragged.current = false;
+  }
+
+  return (
+    <Group
+      draggable={canDrag}
+      onClick={handleClick}
+      onTap={onSelect}
+      onDragStart={canDrag ? handleDragStart : undefined}
+      onDragMove={canDrag ? handleDragMove : undefined}
+      onDragEnd={canDrag ? handleDragEnd : undefined}
+      onMouseEnter={canDrag ? (e) => { const s = e.target.getStage(); if (s) s.container().style.cursor = 'move'; } : undefined}
+      onMouseLeave={canDrag ? (e) => { const s = e.target.getStage(); if (s) s.container().style.cursor = 'default'; } : undefined}
+    >
+      {/* Hinge post */}
+      <Circle
+        x={geo.hingeX}
+        y={geo.hingeY}
+        radius={6}
+        fill={postColor}
+        stroke="#fff"
+        strokeWidth={1}
+        hitRadius={10}
+      />
+
+      {/* Latch post */}
+      <Circle
+        x={geo.latchX}
+        y={geo.latchY}
+        radius={6}
+        fill={postColor}
+        stroke="#fff"
+        strokeWidth={1}
+        hitRadius={10}
+      />
+
+      {/* Swing arc (dashed) — single gate */}
+      {!isDouble && (
+        <Arc
+          x={geo.hingeX}
+          y={geo.hingeY}
+          innerRadius={geo.widthPx - 2}
+          outerRadius={geo.widthPx + 2}
+          angle={90}
+          rotation={geo.arcStartAngle}
+          stroke={arcColor}
+          strokeWidth={1.5}
+          dash={[5, 5]}
+          fill="transparent"
+          listening={false}
+        />
+      )}
+
+      {/* Gate panel line — single */}
+      {!isDouble && (
+        <Line
+          points={[geo.hingeX, geo.hingeY, geo.panelEndX, geo.panelEndY]}
+          stroke={color}
+          strokeWidth={def.strokeWidth}
+          lineCap="round"
+          hitStrokeWidth={12}
+        />
+      )}
+
+      {/* Double gate: two panels */}
+      {isDouble && (
+        <>
+          <Arc
+            x={geo.hingeX}
+            y={geo.hingeY}
+            innerRadius={geo.widthPx / 2 - 2}
+            outerRadius={geo.widthPx / 2 + 2}
+            angle={90}
+            rotation={geo.arcStartAngle}
+            stroke={arcColor}
+            strokeWidth={1.5}
+            dash={[5, 5]}
+            fill="transparent"
+            listening={false}
+          />
+          <Arc
+            x={geo.latchX}
+            y={geo.latchY}
+            innerRadius={geo.widthPx / 2 - 2}
+            outerRadius={geo.widthPx / 2 + 2}
+            angle={90}
+            rotation={geo.arc2StartAngle}
+            stroke={arcColor}
+            strokeWidth={1.5}
+            dash={[5, 5]}
+            fill="transparent"
+            listening={false}
+          />
+          <Line
+            points={[geo.hingeX, geo.hingeY, geo.panelEnd1X, geo.panelEnd1Y]}
+            stroke={color}
+            strokeWidth={def.strokeWidth}
+            lineCap="round"
+            hitStrokeWidth={12}
+          />
+          <Line
+            points={[geo.latchX, geo.latchY, geo.panelEnd2X, geo.panelEnd2Y]}
+            stroke={color}
+            strokeWidth={def.strokeWidth}
+            lineCap="round"
+            hitStrokeWidth={12}
+          />
+        </>
+      )}
+
+      {/* Hinge indicator bar */}
+      <Line
+        points={[
+          geo.hingeX - Math.sin((geo.fenceAngleDeg * Math.PI) / 180) * 5,
+          geo.hingeY + Math.cos((geo.fenceAngleDeg * Math.PI) / 180) * 5,
+          geo.hingeX + Math.sin((geo.fenceAngleDeg * Math.PI) / 180) * 5,
+          geo.hingeY - Math.cos((geo.fenceAngleDeg * Math.PI) / 180) * 5,
+        ]}
+        stroke={isSelected ? '#FFD700' : '#333'}
+        strokeWidth={3}
+        lineCap="round"
+        listening={false}
+      />
+
+      {/* Gate width label — centered in gap, offset perpendicular to fence */}
+      {(() => {
+        const cx = (geo.hingeX + geo.latchX) / 2;
+        const cy = (geo.hingeY + geo.latchY) / 2;
+        const labelAngle = geo.fenceAngleDeg > 90 || geo.fenceAngleDeg < -90
+          ? geo.fenceAngleDeg + 180
+          : geo.fenceAngleDeg;
+        const text = `${gate.widthFt}'`;
+        return (
+          <Text
+            x={cx}
+            y={cy}
+            text={text}
+            fontSize={11}
+            fontFamily="monospace"
+            fill={isSelected ? '#FFD700' : '#444'}
+            rotation={labelAngle}
+            offsetX={text.length * 3.3}
+            offsetY={-16}
+            listening={false}
+          />
+        );
+      })()}
+    </Group>
+  );
+}
