@@ -13,11 +13,12 @@ interface Props {
   onBeforeEdit: () => void;
   snapEnabled: boolean;
   snapSizeFt: number;
+  labelFontSize?: number;
 }
 
 export function FenceLayer({
   fences, gates, selectedId, selectedType, setSelection,
-  updateFence, onBeforeEdit, snapEnabled, snapSizeFt,
+  updateFence, onBeforeEdit, snapEnabled, snapSizeFt, labelFontSize = 11,
 }: Props) {
   const fenceList = Object.values(fences);
 
@@ -52,6 +53,7 @@ export function FenceLayer({
             snapEnabled={snapEnabled}
             snapSizeFt={snapSizeFt}
             otherVertices={otherVertices}
+            labelFontSize={labelFontSize}
           />
         );
       })}

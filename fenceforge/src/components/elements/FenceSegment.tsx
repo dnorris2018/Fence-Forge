@@ -55,6 +55,7 @@ interface Props {
   snapSizeFt?: number;
   /** Vertices from all other fences — used for vertex-snap */
   otherVertices?: [number, number][];
+  labelFontSize?: number;
 }
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -115,7 +116,7 @@ function buildSegInfos(points: number[], finishSide: 'left' | 'right'): SegInfo[
 export function FenceSegment({
   fence, gates, isSelected, onSelect,
   updateFence, onBeforeEdit,
-  snapEnabled = true, snapSizeFt = 1, otherVertices = [],
+  snapEnabled = true, snapSizeFt = 1, otherVertices = [], labelFontSize = 11,
 }: Props) {
   const def = FENCE_TYPES[fence.fenceType];
   if (!def) return null;
@@ -250,15 +251,38 @@ export function FenceSegment({
           x={lbl.mx}
           y={lbl.my}
           text={lbl.text}
-          fontSize={11}
+          fontSize={labelFontSize}
           fontFamily="monospace"
           fill="#333"
           rotation={lbl.labelAngle}
-          offsetX={lbl.text.length * 3.3}
-          offsetY={strokeWidth / 2 + 12}
+          offsetX={lbl.text.length * (labelFontSize * 0.3)}
+          offsetY={strokeWidth / 2 + labelFontSize + 1}
           listening={false}
         />
       ))}
+
+      {/* Finish-side label — "Finish" at midpoint of each segment, offset onto gradient side */}
+      {segs.map((seg, i) => {
+        const finishText = 'Finish';
+        const charW = labelFontSize * 0.55;
+        return (
+          <Text
+            key={`finish-${i}`}
+            x={seg.gox}
+            y={seg.goy}
+            text={finishText}
+            fontSize={labelFontSize}
+            fontFamily="sans-serif"
+            fontStyle="italic"
+            fill={color}
+            opacity={0.75}
+            rotation={seg.labelAngle}
+            offsetX={finishText.length * charW / 2}
+            offsetY={labelFontSize / 2}
+            listening={false}
+          />
+        );
+      })}
 
       {/* ── Line post markers ───────────────────────────────────────────────── */}
       {linePostPositions.map((lp, i) => (

@@ -23,7 +23,7 @@ export const ORNAMENTAL_HEIGHTS     = [4, 5, 6]         as const;
 export type FenceHeight = 4 | 5 | 6 | 8 | 10;
 
 // Style types per fence variant
-export type WoodPrivacyStyle    = 'shadow-box' | 'board-on-board' | 'cross-board' | 'horizontal';
+export type WoodPrivacyStyle    = 'standard' | 'shadow-box' | 'board-on-board' | 'cross-board' | 'horizontal';
 export type RanchRailStyle      = '3-board' | '4-board' | 'crossbuck' | '3-board-crossbuck';
 export type CapBoardStyle       = 'flush' | 'dado' | 'board-on-board' | 'cross-board';
 export type VinylPrivacyStyle   = '6-panel' | '8-panel';
@@ -40,6 +40,7 @@ export type FenceStyle =
 
 // Style option arrays for picker UI
 export const WOOD_PRIVACY_STYLES: { key: WoodPrivacyStyle; label: string }[] = [
+  { key: 'standard',       label: 'Standard' },
   { key: 'shadow-box',     label: 'Shadow Box' },
   { key: 'board-on-board', label: 'Board on Board' },
   { key: 'cross-board',    label: 'Cross Board' },

@@ -23,6 +23,8 @@ interface UiStore {
   openElevationView: (fenceId: string) => void;
   closeElevationView: () => void;
   setElevationPostIdx: (idx: number) => void;
+  labelFontSize: number;
+  setLabelFontSize: (size: number) => void;
 }
 
 export const useUiStore = create<UiStore>((set) => ({
@@ -35,6 +37,7 @@ export const useUiStore = create<UiStore>((set) => ({
   sidebarTab: 'fences',
   elevationFenceId: null,
   elevationPostIdx: 0,
+  labelFontSize: 11,
 
   setZoom: (z) => set({ zoom: Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z)) }),
   setPan: (x, y) => set({ panX: x, panY: y }),
@@ -42,6 +45,7 @@ export const useUiStore = create<UiStore>((set) => ({
   toggleSnap: () => set(s => ({ snapEnabled: !s.snapEnabled })),
   setSnapSize: (ft) => set({ snapSizeFt: ft }),
   setSidebarTab: (tab) => set({ sidebarTab: tab }),
+  setLabelFontSize: (size) => set({ labelFontSize: size }),
   openElevationView: (fenceId) => set({ elevationFenceId: fenceId, elevationPostIdx: 0 }),
   closeElevationView: () => set({ elevationFenceId: null, elevationPostIdx: 0 }),
   setElevationPostIdx: (idx) => set({ elevationPostIdx: idx }),

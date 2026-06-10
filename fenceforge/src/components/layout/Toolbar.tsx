@@ -1,4 +1,4 @@
-import { MousePointer2, PenLine, Package, GitFork, Hand, Grid3x3, ZoomIn, ZoomOut, Undo2, Redo2, Magnet, Trash2, FileDown } from 'lucide-react';
+import { MousePointer2, PenLine, Package, GitFork, Hand, Grid3x3, ZoomIn, ZoomOut, Undo2, Redo2, Magnet, Trash2, FileDown, CaseSensitive } from 'lucide-react';
 import { useCanvasStore } from '../../store/canvasStore';
 import { useUiStore } from '../../store/uiStore';
 import { useHistory } from '../../hooks/useHistory';
@@ -22,7 +22,7 @@ export function Toolbar() {
   const clearSelection = useCanvasStore(s => s.clearSelection);
   const fences = useCanvasStore(s => s.fences);
   const gates  = useCanvasStore(s => s.gates);
-  const { zoom, setZoom, gridVisible, toggleGrid, snapEnabled, toggleSnap, setSidebarTab } = useUiStore();
+  const { zoom, setZoom, gridVisible, toggleGrid, snapEnabled, toggleSnap, setSidebarTab, labelFontSize, setLabelFontSize } = useUiStore();
   const { undo, redo, saveHistory } = useHistory();
   const canUndo = useHistoryStore(s => s.past.length > 0);
   const canRedo = useHistoryStore(s => s.future.length > 0);
@@ -142,6 +142,22 @@ export function Toolbar() {
       >
         1:1
       </button>
+
+      <div className="w-px h-5 bg-gray-600 mx-1" />
+
+      {/* Label font size */}
+      <CaseSensitive size={15} className="text-gray-400 shrink-0" />
+      <input
+        type="range"
+        min={7}
+        max={28}
+        step={1}
+        value={labelFontSize}
+        onChange={e => setLabelFontSize(Number(e.target.value))}
+        className="w-20 accent-amber-400"
+        title={`Label font size: ${labelFontSize}px`}
+      />
+      <span className="text-xs text-gray-400 w-6">{labelFontSize}</span>
     </div>
   );
 }

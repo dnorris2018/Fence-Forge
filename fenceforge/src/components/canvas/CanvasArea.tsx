@@ -20,7 +20,7 @@ export function CanvasArea() {
   const stageRef = useRef<Konva.Stage>(null);
   const [size, setSize] = useState({ width: 800, height: 600 });
 
-  const { zoom, panX, panY, setZoom, setPan, gridVisible, snapSizeFt, snapEnabled } = useUiStore();
+  const { zoom, panX, panY, setZoom, setPan, gridVisible, snapSizeFt, snapEnabled, labelFontSize } = useUiStore();
   const toolMode      = useCanvasStore(s => s.toolMode);
   const fences        = useCanvasStore(s => s.fences);
   const gates         = useCanvasStore(s => s.gates);
@@ -237,6 +237,7 @@ export function CanvasArea() {
           onBeforeEdit={handleBeforeEdit}
           snapEnabled={snapEnabled}
           snapSizeFt={snapSizeFt}
+          labelFontSize={labelFontSize}
         />
         <GateLayer
           gates={gates}
