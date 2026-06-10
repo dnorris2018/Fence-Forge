@@ -263,7 +263,7 @@ export function FenceSegment({
 
       {/* Finish-side label — "Finish" at midpoint of each segment, offset onto gradient side */}
       {segs.map((seg, i) => {
-        const finishText = 'Finish';
+        const finishText = 'Finished Side';
         const charW = labelFontSize * 0.55;
         return (
           <Text
