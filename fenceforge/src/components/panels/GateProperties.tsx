@@ -114,6 +114,21 @@ export function GateProperties({ gateId }: Props) {
         </div>
       </div>
 
+      {/* Metal frame */}
+      <div>
+        <p className="text-xs text-gray-400 mb-1">Frame</p>
+        <button
+          onClick={() => patch('metalFrame', !gate.metalFrame)}
+          className={`w-full py-1 rounded text-xs transition-colors ${
+            gate.metalFrame
+              ? 'bg-amber-500 text-gray-900 font-medium'
+              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+          }`}
+        >
+          {gate.metalFrame ? 'Metal Frame On' : 'Metal Frame Off'}
+        </button>
+      </div>
+
       <button
         onClick={handleDelete}
         className="w-full py-1.5 rounded bg-red-900/50 hover:bg-red-800 text-red-300 text-xs font-medium transition-colors"

@@ -1,9 +1,10 @@
-import { MousePointer2, PenLine, Package, GitFork, Hand, Grid3x3, ZoomIn, ZoomOut, Undo2, Redo2, Magnet, Trash2, FileDown, CaseSensitive } from 'lucide-react';
+import { MousePointer2, PenLine, Package, GitFork, Hand, Grid3x3, ZoomIn, ZoomOut, Undo2, Redo2, Magnet, Trash2, FileDown, ImageDown, CaseSensitive } from 'lucide-react';
 import { useCanvasStore } from '../../store/canvasStore';
 import { useUiStore } from '../../store/uiStore';
 import { useHistory } from '../../hooks/useHistory';
 import { useHistoryStore } from '../../store/historyStore';
 import { exportToPdf } from '../../utils/exportPdf';
+import { exportToJpeg } from '../../utils/exportJpeg';
 import type { ToolMode } from '../../types';
 
 const TOOLS: { mode: ToolMode; icon: React.ReactNode; title: string }[] = [
@@ -105,6 +106,15 @@ export function Toolbar() {
         className="p-1.5 rounded bg-blue-900/40 hover:bg-blue-700/60 text-blue-400 hover:text-blue-200 border border-blue-800/60 transition-colors"
       >
         <FileDown size={16} />
+      </button>
+
+      {/* Export JPEG */}
+      <button
+        title="Save as JPEG"
+        onClick={exportToJpeg}
+        className="p-1.5 rounded bg-green-900/40 hover:bg-green-700/60 text-green-400 hover:text-green-200 border border-green-800/60 transition-colors"
+      >
+        <ImageDown size={16} />
       </button>
 
       <div className="w-px h-5 bg-gray-600 mx-1" />

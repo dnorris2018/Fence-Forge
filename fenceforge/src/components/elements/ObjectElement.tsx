@@ -10,6 +10,7 @@ import { BrickWallObject } from '../objects/BrickWallObject';
 import { FreeformPoolObject } from '../objects/FreeformPoolObject';
 import { BuildingObject } from '../objects/BuildingObject';
 import { HouseObject } from '../objects/HouseObject';
+import { LabelTextBox } from '../objects/LabelTextObject';
 import { useCanvasStore } from '../../store/canvasStore';
 import { useHistoryStore } from '../../store/historyStore';
 
@@ -110,6 +111,9 @@ export function ObjectElement({ obj, isSelected, onSelect }: Props) {
       {obj.objectType === 'bush'  && <BushObject  width={obj.width} height={obj.height} />}
       {obj.objectType === 'tree'  && <TreeObject  width={obj.width} height={obj.height} />}
       {obj.objectType === 'shed'  && <ShedObject  width={obj.width} height={obj.height} />}
+      {obj.objectType === 'label-text' && (
+        <LabelTextBox obj={obj} isSelected={isSelected} />
+      )}
       {obj.objectType === 'house' && (
         <HouseObject
           width={obj.width} height={obj.height}
@@ -119,13 +123,13 @@ export function ObjectElement({ obj, isSelected, onSelect }: Props) {
       )}
       {/* Hit area — building without points is stale data, skip it so it can't be selected */}
       {obj.objectType !== 'building' && (
-        obj.objectType === 'shed' || obj.objectType === 'house'
+        obj.objectType === 'shed' || obj.objectType === 'house' || obj.objectType === 'label-text'
           ? <Rect x={0} y={0} width={obj.width} height={obj.height} fill="white" opacity={0.01} />
           : <Ellipse x={hw} y={hh} radiusX={hw} radiusY={hh} fill="white" opacity={0.01} />
       )}
 
       {/* Selection outline */}
-      {isSelected && obj.objectType !== 'shed' && obj.objectType !== 'building' && obj.objectType !== 'house' && (
+      {isSelected && obj.objectType !== 'shed' && obj.objectType !== 'building' && obj.objectType !== 'house' && obj.objectType !== 'label-text' && (
         <Ellipse
           x={hw} y={hh}
           radiusX={hw + 2} radiusY={hh + 2}

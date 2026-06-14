@@ -12,6 +12,7 @@ interface Props {
   onSelect: () => void;
   updateGate?: (id: string, patch: Partial<Gate>) => void;
   onBeforeEdit?: () => void;
+  labelFontSize?: number;
 }
 
 /** Project (x,y) onto the nearest point on the fence polyline; returns segment index + t */
@@ -32,13 +33,13 @@ function projectToFence(x: number, y: number, points: number[]) {
   return best;
 }
 
-export function GateElement({ gate, fence, isSelected, onSelect, updateGate, onBeforeEdit }: Props) {
+export function GateElement({ gate, fence, isSelected, onSelect, updateGate, onBeforeEdit, labelFontSize = 11 }: Props) {
   const didPushHistory = useRef(false);
   const wasDragged = useRef(false);
 
   if (!fence) return null;
 
-  const geo = computeGateGeometry(gate, fence.points);
+  const geo = computeGateGeometry(gate, fence.points, fence.finishSide);
   if (!geo) return null;
 
   const def = FENCE_TYPES[gate.fenceType];
@@ -206,25 +207,58 @@ export function GateElement({ gate, fence, isSelected, onSelect, updateGate, onB
         listening={false}
       />
 
-      {/* Gate width label — centered in gap, offset perpendicular to fence */}
+      {/* Metal frame — two parallel rails along each open leaf */}
+      {gate.metalFrame && (() => {
+        const frameColor = isSelected ? '#FFD700' : '#222';
+        const railOffset = def.strokeWidth / 2 + 2;
+
+        function leafRails(x1: number, y1: number, x2: number, y2: number) {
+          const len = Math.hypot(x2 - x1, y2 - y1);
+          if (len === 0) return null;
+          const px = -(y2 - y1) / len * railOffset;
+          const py = (x2 - x1) / len * railOffset;
+          return (
+            <>
+              <Line points={[x1 + px, y1 + py, x2 + px, y2 + py]}
+                stroke={frameColor} strokeWidth={2.5} lineCap="round" listening={false} />
+              <Line points={[x1 - px, y1 - py, x2 - px, y2 - py]}
+                stroke={frameColor} strokeWidth={2.5} lineCap="round" listening={false} />
+            </>
+          );
+        }
+
+        if (isDouble) {
+          return (
+            <>
+              {leafRails(geo.hingeX, geo.hingeY, geo.panelEnd1X, geo.panelEnd1Y)}
+              {leafRails(geo.latchX, geo.latchY, geo.panelEnd2X, geo.panelEnd2Y)}
+            </>
+          );
+        }
+        return leafRails(geo.hingeX, geo.hingeY, geo.panelEndX, geo.panelEndY);
+      })()}
+
+      {/* Gate width label — offset to the OPPOSITE side of the swing */}
       {(() => {
         const cx = (geo.hingeX + geo.latchX) / 2;
         const cy = (geo.hingeY + geo.latchY) / 2;
-        const labelAngle = geo.fenceAngleDeg > 90 || geo.fenceAngleDeg < -90
-          ? geo.fenceAngleDeg + 180
-          : geo.fenceAngleDeg;
+        const labelFlipped = geo.fenceAngleDeg > 90 || geo.fenceAngleDeg < -90;
+        const labelAngle = labelFlipped ? geo.fenceAngleDeg + 180 : geo.fenceAngleDeg;
+        const interiorSign = fence.finishSide === 'left' ? -1 : 1;
+        const swingSign = gate.swingDirection === 'inward' ? interiorSign : -interiorSign;
+        const labelOffset = def.strokeWidth / 2 + labelFontSize + 1;
         const text = `${gate.widthFt}'`;
         return (
           <Text
             x={cx}
             y={cy}
             text={text}
-            fontSize={11}
+            fontSize={labelFontSize}
             fontFamily="monospace"
             fill={isSelected ? '#FFD700' : '#444'}
             rotation={labelAngle}
-            offsetX={text.length * 3.3}
-            offsetY={-16}
+            offsetX={text.length * (labelFontSize * 0.3)}
+            offsetY={(labelFlipped ? -1 : 1) * swingSign * labelOffset}
             listening={false}
           />
         );

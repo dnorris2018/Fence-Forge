@@ -143,10 +143,10 @@ export function FreeformPoolObject({ points, curved = false }: Props) {
         n.lineWidth   = 1;
         n.stroke();
 
-        // Clip to outer path — canvas's own stroke rendering handles coping at any curvature
+        // Clip to outer path — use evenodd so Catmull-Rom self-intersections don't punch holes
         n.save();
         makePath();
-        n.clip();
+        n.clip('evenodd');
 
         // Water fills the entire clip region
         drawWater(n, points, minX, minY, maxX, maxY);

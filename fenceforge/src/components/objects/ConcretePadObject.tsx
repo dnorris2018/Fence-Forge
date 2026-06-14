@@ -55,14 +55,17 @@ export function ConcretePadObject({ points, curved = false }: Props) {
         // ── tile grid (clipped to polygon) ────────────────────────────
         n.save();
         polyPath();
-        n.clip();
+        n.clip('evenodd');
 
-        // Align grid to polygon's local bounding box top-left corner
-        const col0 = minX;
-        const row0 = minY;
+        // Start well before the vertex bounds — Catmull-Rom curves can bulge
+        // significantly beyond vertex extents (e.g. stadium rounded ends).
+        // Mirror the pool's oversized-rect approach: pad by a full bounding-box dimension.
+        const bw = maxX - minX, bh = maxY - minY;
+        const col0 = minX - bw;
+        const row0 = minY - bh;
 
-        for (let row = row0; row < maxY + TILE_H; row += TILE_H) {
-          for (let col = col0; col < maxX + TILE_W; col += TILE_W) {
+        for (let row = row0; row < maxY + bh; row += TILE_H) {
+          for (let col = col0; col < maxX + bw; col += TILE_W) {
             const tx = col + GROUT;
             const ty = row + GROUT;
             const tw = TILE_W - GROUT * 2;

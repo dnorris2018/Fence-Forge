@@ -20,7 +20,7 @@ export interface GateGeometry {
   gapHalfPx: number;
 }
 
-export function computeGateGeometry(gate: Gate, points: number[]): GateGeometry | null {
+export function computeGateGeometry(gate: Gate, points: number[], finishSide: 'left' | 'right' = 'left'): GateGeometry | null {
   const segIdx = gate.segmentIndex;
   const ptIdx = segIdx * 2;
   if (ptIdx + 3 >= points.length) return null;
@@ -38,20 +38,25 @@ export function computeGateGeometry(gate: Gate, points: number[]): GateGeometry 
   const rad = (fenceAngleDeg * Math.PI) / 180;
   const ux = Math.cos(rad), uy = Math.sin(rad);
 
-  // ── Hinge / latch posts ────────────────────────────────────────────────────
-  const hingeSign = gate.hingeSide === 'left' ? -1 : 1;
-  const hingeX = cx + ux * halfW * hingeSign;
-  const hingeY = cy + uy * halfW * hingeSign;
-  const latchX = cx - ux * halfW * hingeSign;
-  const latchY = cy - uy * halfW * hingeSign;
-
-  // ── Perpendicular direction ────────────────────────────────────────────────
-  // swingSign is intentionally INDEPENDENT of hingeSign so that "inward" always
-  // means the same side of the fence regardless of which end has the hinge.
-  //   inward  = -1 → left-hand perpendicular of the fence travel direction
-  //   outward = +1 → right-hand perpendicular
-  const swingSign = gate.swingDirection === 'inward' ? 1 : -1;
+  // ── Perpendicular / interior direction ───────────────────────────────────
+  // "Inward" means toward the yard interior, which is always opposite the finished face.
+  const interiorSign = finishSide === 'left' ? -1 : 1;
+  const swingSign = gate.swingDirection === 'inward' ? interiorSign : -interiorSign;
   const perpAngle = rad + (Math.PI / 2) * swingSign; // radians
+
+  // ── Hinge / latch posts ────────────────────────────────────────────────────
+  // "Left hinge" = screen-left (smaller X) for horizontal fences, screen-top (smaller Y)
+  // for vertical fences. We normalise by flipping hingeSign when the fence primary direction
+  // is negative (leftward or upward), so "left" is always visually consistent on the canvas.
+  const hingeSign = gate.hingeSide === 'left' ? -1 : 1;
+  const primarySign = Math.abs(ux) >= Math.abs(uy)
+    ? (Math.sign(ux) || 1)
+    : (Math.sign(uy) || 1);
+  const effHingeSign = hingeSign * primarySign;
+  const hingeX = cx + ux * halfW * effHingeSign;
+  const hingeY = cy + uy * halfW * effHingeSign;
+  const latchX = cx - ux * halfW * effHingeSign;
+  const latchY = cy - uy * halfW * effHingeSign;
 
   // ── Gate panels ───────────────────────────────────────────────────────────
   // Single gate: one full-width panel from hinge post
@@ -65,15 +70,8 @@ export function computeGateGeometry(gate: Gate, points: number[]): GateGeometry 
   const panelEnd2Y = latchY + Math.sin(perpAngle) * halfW;
 
   // ── Swing arcs ────────────────────────────────────────────────────────────
-  // Each arc sweeps exactly 90° and connects the gate panel tip (open position)
-  // to the post at the other end (closed position, lying in the fence gap).
-  //
-  // Konva Arc always draws clockwise for positive `angle`.  To handle the two
-  // rotational directions we adjust `rotation` so the CW 90° sweep always covers
-  // the correct quadrant.
-  //
   // sweepCW: arc1 (centered at hinge) sweeps clockwise when true.
-  const sweepCW = (hingeSign * swingSign) > 0;
+  const sweepCW = (effHingeSign * swingSign) > 0;
   const perpAngleDeg = fenceAngleDeg + swingSign * 90; // where the panel tip currently is
 
   // Arc 1 (hinge post): rotation adjusted so CW sweep ends at the latch direction.

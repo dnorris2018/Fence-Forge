@@ -7,6 +7,7 @@ import { WallProperties } from '../panels/WallProperties';
 import { PolyObjectProperties } from '../panels/PolyObjectProperties';
 import { BuildingProperties } from '../panels/BuildingProperties';
 import { HouseProperties } from '../panels/HouseProperties';
+import { LabelTextProperties } from '../panels/LabelTextProperties';
 import { MaterialList } from '../panels/MaterialList';
 
 type RightTab = 'properties' | 'materials';
@@ -108,6 +109,9 @@ export function PropertiesPanel() {
             )}
             {selectedType === 'object' && selectedObj?.objectType === 'house' && (
               <HouseProperties objectId={selectedId!} />
+            )}
+            {selectedType === 'object' && selectedObj?.objectType === 'label-text' && (
+              <LabelTextProperties objectId={selectedId!} />
             )}
           </>
         )}

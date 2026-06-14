@@ -247,6 +247,7 @@ export function CanvasArea() {
           setSelection={setSelection}
           updateGate={toolMode === 'select' ? updateGate : undefined}
           onBeforeEdit={handleBeforeEdit}
+          labelFontSize={labelFontSize}
         />
         <DrawingLayer
           drawingPoints={drawingPoints}

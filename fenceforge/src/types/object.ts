@@ -1,4 +1,4 @@
-export type ObjectType = 'bush' | 'tree' | 'concrete-pad' | 'shed' | 'brick-wall' | 'pool-freeform' | 'building' | 'house';
+export type ObjectType = 'bush' | 'tree' | 'concrete-pad' | 'shed' | 'brick-wall' | 'pool-freeform' | 'building' | 'house' | 'label-text';
 export type { HouseStyle } from '../constants/houseShapes';
 
 export interface PlaceableObject {
@@ -22,6 +22,9 @@ export interface PlaceableObject {
   houseStyle?: import('../constants/houseShapes').HouseStyle;
   /** Mirror house footprint horizontally */
   houseFlipX?: boolean;
+  /** Arrow tip in world coordinates — label-text only (stays fixed when box moves) */
+  arrowTipX?: number;
+  arrowTipY?: number;
 }
 
 /** Object types placed by drawing a polygon rather than a single click */

@@ -3,6 +3,7 @@ import autoTable from 'jspdf-autotable';
 import { getGlobalStage } from './stageRef';
 import { computeMaterials } from './materials';
 import { FENCE_TYPES } from '../constants/fenceTypes';
+import { useUiStore } from '../store/uiStore';
 import type { FenceLine, Gate, FenceTypeKey, FenceHeight, FenceStyle } from '../types';
 
 function hexToRgb(hex: string): [number, number, number] {
@@ -32,6 +33,11 @@ export async function exportToPdf(
 ): Promise<void> {
   const stage = getGlobalStage();
   const hasFences = Object.keys(fences).length > 0;
+
+  // Temporarily hide grid for a clean export
+  const { gridVisible, toggleGrid } = useUiStore.getState();
+  if (gridVisible) toggleGrid();
+  await new Promise(r => requestAnimationFrame(r));
 
   // ── Page 1: Drawing (landscape) ──────────────────────────────────────────
   const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'letter' });
@@ -63,6 +69,9 @@ export async function exportToPdf(
     doc.setFontSize(11);
     doc.text('(No canvas available)', PW / 2, PH / 2, { align: 'center' });
   }
+
+  // Restore grid
+  if (gridVisible) toggleGrid();
 
   if (!hasFences) {
     doc.save('fenceforge-export.pdf');

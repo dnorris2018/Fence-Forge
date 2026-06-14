@@ -10,4 +10,5 @@ export const OBJECT_DEFAULTS: Record<ObjectType, { label: string; width: number;
   'pool-freeform':{ label: 'Pool',         width:  0,                   height:  0,                   icon: '🏊' },
   'building':      { label: 'Building',    width: 0,                    height: 0,                    icon: '🏢' },
   'house':         { label: 'House',       width: 30 * PIXELS_PER_FOOT, height: 20 * PIXELS_PER_FOOT, icon: '🏠' },
+  'label-text':    { label: 'Text Label',  width: 10 * PIXELS_PER_FOOT, height:  3 * PIXELS_PER_FOOT, icon: '🔤' },
 };

@@ -14,4 +14,5 @@ export interface Gate {
   swingDirection: SwingDirection;
   widthFt: number;
   fenceType: FenceTypeKey;
+  metalFrame?: boolean;
 }

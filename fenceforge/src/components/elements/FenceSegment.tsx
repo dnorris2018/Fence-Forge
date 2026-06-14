@@ -274,8 +274,8 @@ export function FenceSegment({
             fontSize={labelFontSize}
             fontFamily="sans-serif"
             fontStyle="italic"
-            fill={color}
-            opacity={0.75}
+            fill="#000"
+            opacity={0.6}
             rotation={seg.labelAngle}
             offsetX={finishText.length * charW / 2}
             offsetY={labelFontSize / 2}

@@ -11,9 +11,10 @@ interface Props {
   setSelection: (id: string | null, type: SelectionType) => void;
   updateGate?: (id: string, patch: Partial<Gate>) => void;
   onBeforeEdit?: () => void;
+  labelFontSize?: number;
 }
 
-export function GateLayer({ gates, fences, selectedId, selectedType, setSelection, updateGate, onBeforeEdit }: Props) {
+export function GateLayer({ gates, fences, selectedId, selectedType, setSelection, updateGate, onBeforeEdit, labelFontSize = 11 }: Props) {
   return (
     <Layer>
       {Object.values(gates).map(gate => (
@@ -25,6 +26,7 @@ export function GateLayer({ gates, fences, selectedId, selectedType, setSelectio
           onSelect={() => setSelection(gate.id, 'gate')}
           updateGate={updateGate}
           onBeforeEdit={onBeforeEdit}
+          labelFontSize={labelFontSize}
         />
       ))}
     </Layer>
