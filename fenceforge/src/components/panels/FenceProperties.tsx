@@ -5,7 +5,7 @@ import { useUiStore } from '../../store/uiStore';
 import { FENCE_TYPES, getFenceColor } from '../../constants/fenceTypes';
 import { segmentLength } from '../../utils/geometry';
 import { PIXELS_PER_FOOT } from '../../constants/canvas';
-import type { FenceTypeKey, FenceHeight, FenceStyle } from '../../types';
+import type { FenceTypeKey, FenceStyle } from '../../types';
 import {
   WOOD_PRIVACY_HEIGHTS, WOOD_PRIVACY_STYLES,
   RANCH_RAIL_HEIGHTS, RANCH_RAIL_STYLES,
@@ -70,24 +70,6 @@ export function FenceProperties({ fenceId }: Props) {
     colorPickSessionRef.current = false;
   }
 
-  const heightOptions = HEIGHT_OPTIONS_MAP[fence.fenceType];
-  const styleOptions  = STYLE_OPTIONS_MAP[fence.fenceType];
-
-  function handleHeightChange(h: FenceHeight) {
-    saveHistory();
-    updateFence(fenceId, { heightFt: h });
-  }
-
-  function handleStyleChange(s: FenceStyle) {
-    saveHistory();
-    updateFence(fenceId, { fenceStyle: s });
-  }
-
-  function flipFinishSide() {
-    saveHistory();
-    updateFence(fenceId, { finishSide: fence.finishSide === 'left' ? 'right' : 'left' });
-  }
-
   function handleDelete() {
     saveHistory();
     deleteFence(fenceId);
@@ -136,69 +118,29 @@ export function FenceProperties({ fenceId }: Props) {
         <p className="text-sm text-amber-300 font-mono">{lengthFt} ft</p>
       </div>
 
-      {/* Height picker */}
-      {heightOptions && (
+
+
+      {/* Line post spacing (ornamental only) */}
+      {(fence.fenceType === 'aluminum-ornamental' || fence.fenceType === 'steel-ornamental') && (
         <div>
-          <p className="text-xs text-gray-400 mb-2">Fence Height</p>
-          <div className="flex gap-1 flex-wrap">
-            {heightOptions.map(h => (
+          <p className="text-xs text-gray-400 mb-2">Line Post Spacing</p>
+          <div className="flex gap-1">
+            {[6, 8].map(sp => (
               <button
-                key={h}
-                onClick={() => handleHeightChange(h as FenceHeight)}
+                key={sp}
+                onClick={() => { saveHistory(); updateFence(fenceId, { linePostSpacingFt: sp }); }}
                 className={`flex-1 py-1 rounded text-xs font-mono transition-colors ${
-                  (fence.heightFt ?? heightOptions[0]) === h
+                  (fence.linePostSpacingFt ?? 6) === sp
                     ? 'bg-amber-500/30 border border-amber-500/60 text-amber-300'
                     : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
                 }`}
               >
-                {h}'
+                {sp}'
               </button>
             ))}
           </div>
         </div>
       )}
-
-      {/* Style picker */}
-      {styleOptions && (
-        <div>
-          <p className="text-xs text-gray-400 mb-2">Style</p>
-          <div className="flex flex-col gap-1">
-            {styleOptions.map(opt => {
-              // Show the color this style would produce given current height
-              const previewColor = getFenceColor({ ...fence, fenceStyle: opt.key });
-              return (
-                <button
-                  key={opt.key}
-                  onClick={() => handleStyleChange(opt.key)}
-                  className={`w-full flex items-center gap-2 py-1 px-2 rounded text-xs text-left transition-colors ${
-                    (fence.fenceStyle ?? styleOptions[0].key) === opt.key
-                      ? 'bg-amber-500/30 border border-amber-500/60 text-amber-300'
-                      : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
-                  }`}
-                >
-                  <span
-                    className="w-3 h-3 rounded-sm border border-black/20 shrink-0"
-                    style={{ background: previewColor }}
-                  />
-                  {opt.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Finish Side */}
-      <div>
-        <p className="text-xs text-gray-400 mb-2">Finish Side</p>
-        <button
-          onClick={flipFinishSide}
-          className="w-full py-1.5 px-3 rounded bg-gray-700 hover:bg-gray-600 text-sm text-white transition-colors"
-        >
-          ↔ Flip Finish Side
-          <span className="text-xs text-gray-400 ml-2">({fence.finishSide})</span>
-        </button>
-      </div>
 
       {/* Elevation profile */}
       <button

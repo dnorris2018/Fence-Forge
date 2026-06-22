@@ -13,6 +13,8 @@ interface UiStore {
   elevationFenceId: string | null;
   /** Index of the selected post in elevation view */
   elevationPostIdx: number;
+  /** Which segment of the selected poly object is highlighted for curve editing */
+  selectedPolySegment: number | null;
 
   setZoom: (z: number) => void;
   setPan: (x: number, y: number) => void;
@@ -23,6 +25,7 @@ interface UiStore {
   openElevationView: (fenceId: string) => void;
   closeElevationView: () => void;
   setElevationPostIdx: (idx: number) => void;
+  setSelectedPolySegment: (idx: number | null) => void;
   labelFontSize: number;
   setLabelFontSize: (size: number) => void;
 }
@@ -37,6 +40,7 @@ export const useUiStore = create<UiStore>((set) => ({
   sidebarTab: 'fences',
   elevationFenceId: null,
   elevationPostIdx: 0,
+  selectedPolySegment: null,
   labelFontSize: 11,
 
   setZoom: (z) => set({ zoom: Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z)) }),
@@ -49,4 +53,5 @@ export const useUiStore = create<UiStore>((set) => ({
   openElevationView: (fenceId) => set({ elevationFenceId: fenceId, elevationPostIdx: 0 }),
   closeElevationView: () => set({ elevationFenceId: null, elevationPostIdx: 0 }),
   setElevationPostIdx: (idx) => set({ elevationPostIdx: idx }),
+  setSelectedPolySegment: (idx) => set({ selectedPolySegment: idx }),
 }));

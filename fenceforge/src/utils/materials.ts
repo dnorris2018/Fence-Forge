@@ -97,19 +97,24 @@ export function computeMaterials(
     clusters.push(cluster);
   }
 
-  // Map fenceId → cluster index for each of its endpoints
-  const fenceEndpointClusters = new Map<string, number[]>(); // fenceId → [clusterA, clusterB]
-  for (let i = 0; i < endpoints.length; i++) {
-    const { fenceId } = endpoints[i];
-    const list = fenceEndpointClusters.get(fenceId) ?? [];
-    list.push(assigned[i]);
-    fenceEndpointClusters.set(fenceId, list);
-  }
+  // Build fenceId → fenceType lookup early (needed for cluster classification)
+  const fenceTypeByIdEarly = new Map<string, FenceTypeKey>(fenceList.map(f => [f.id, f.fenceType]));
 
-  // For each cluster: is it an end post (1 fence only) or corner?
-  const clusterIsEnd: boolean[] = clusters.map(cluster => {
-    const uniqueFences = new Set(cluster.map(i => endpoints[i].fenceId));
-    return uniqueFences.size === 1 && cluster.length === 1;
+  // For each cluster, classify how its post(s) should be counted:
+  //  - 'end'    → a single fence's open endpoint, not touching anything else
+  //  - 'corner' → multiple fences of the SAME type meeting at one point (or a closed
+  //               single-fence loop) — shared, counted once
+  //  - 'multi-end' → fences of DIFFERENT types meeting at the same point — each fence
+  //               gets its own end post rather than a merged corner
+  type ClusterKind = { kind: 'end' } | { kind: 'corner' } | { kind: 'multi-end'; fenceIds: string[] };
+  const clusterKinds: ClusterKind[] = clusters.map(cluster => {
+    const fenceIds = Array.from(new Set(cluster.map(i => endpoints[i].fenceId)));
+    if (fenceIds.length === 1) {
+      return { kind: cluster.length === 1 ? 'end' : 'corner' };
+    }
+    const types = new Set(fenceIds.map(id => fenceTypeByIdEarly.get(id)));
+    if (types.size === 1) return { kind: 'corner' };
+    return { kind: 'multi-end', fenceIds };
   });
 
   // ── Per-type accumulators ─────────────────────────────────────────────────
@@ -136,21 +141,22 @@ export function computeMaterials(
       ) / PIXELS_PER_FOOT;
     }
 
-    // ── Endpoint posts ────────────────────────────────────────────────────
-    const epClusters = fenceEndpointClusters.get(f.id) ?? [];
-    const seenEpClusters = new Set<number>();
-    for (const ci of epClusters) {
-      if (seenEpClusters.has(ci)) continue; // closed fence: both endpoints same cluster
-      seenEpClusters.add(ci);
-      if (clusterIsEnd[ci]) acc.endPosts++;
-      else                   acc.cornerPosts++;
+    // ── Internal (intermediate) vertices → corner or line post by angle ──
+    for (let vi = 1; vi < n - 1; vi++) {
+      const ax = f.points[(vi - 1) * 2] - f.points[vi * 2];
+      const ay = f.points[(vi - 1) * 2 + 1] - f.points[vi * 2 + 1];
+      const bx = f.points[(vi + 1) * 2] - f.points[vi * 2];
+      const by = f.points[(vi + 1) * 2 + 1] - f.points[vi * 2 + 1];
+      const lenA = Math.hypot(ax, ay), lenB = Math.hypot(bx, by);
+      if (lenA === 0 || lenB === 0) continue;
+      const angleDeg = Math.acos(Math.min(1, Math.max(-1, (ax * bx + ay * by) / (lenA * lenB)))) * 180 / Math.PI;
+      if (angleDeg < 135) acc.cornerPosts++;
+      else acc.linePosts++;
     }
 
-    // ── Internal (intermediate) vertices → corner posts ───────────────────
-    acc.cornerPosts += Math.max(0, n - 2);
-
     // ── Line posts ────────────────────────────────────────────────────────
-    const spacing = linePostSpacingFt(ft);
+    const spacing = f.linePostSpacingFt ?? linePostSpacingFt(ft);
+    const fixedSpacing = ft === 'aluminum-ornamental' || ft === 'steel-ornamental';
     for (let si = 0; si < n - 1; si++) {
       const x1 = f.points[si * 2],       y1 = f.points[si * 2 + 1];
       const x2 = f.points[(si + 1) * 2], y2 = f.points[(si + 1) * 2 + 1];
@@ -175,8 +181,31 @@ export function computeMaterials(
 
       for (const pieceFt of pieces) {
         if (pieceFt > spacing) {
-          acc.linePosts += Math.ceil(pieceFt / spacing) - 1;
+          acc.linePosts += fixedSpacing
+            ? Math.floor(pieceFt / spacing)
+            : Math.ceil(pieceFt / spacing) - 1;
         }
+      }
+    }
+  }
+
+  // ── Endpoint / corner posts — one pass per cluster, so a shared point between
+  // multiple fences of the same type counts as a single corner post, while a
+  // point shared between different fence types gives each its own end post. ──
+  const fenceByIdForPosts = new Map<string, FenceLine>(fenceList.map(f => [f.id, f]));
+  for (let ci = 0; ci < clusters.length; ci++) {
+    const kind = clusterKinds[ci];
+    const fenceId = endpoints[clusters[ci][0]].fenceId;
+    if (kind.kind === 'end') {
+      const ft = fenceTypeByIdEarly.get(fenceId)!;
+      getType(ft, getFenceColor(fenceByIdForPosts.get(fenceId)!)).endPosts++;
+    } else if (kind.kind === 'corner') {
+      const ft = fenceTypeByIdEarly.get(fenceId)!;
+      getType(ft, getFenceColor(fenceByIdForPosts.get(fenceId)!)).cornerPosts++;
+    } else {
+      for (const fid of kind.fenceIds) {
+        const ft = fenceTypeByIdEarly.get(fid)!;
+        getType(ft, getFenceColor(fenceByIdForPosts.get(fid)!)).endPosts++;
       }
     }
   }
@@ -209,18 +238,14 @@ export function computeMaterials(
   }
   const gatePosts = (singleGates + doubleGates) * 2;
 
-  // ── Totals (deduplicated by cluster for posts) ─────────────────────────────
-  let totalEndPosts = 0, totalCornerPosts = 0;
-  for (const cluster of clusters) {
-    const uniqueFences = new Set(cluster.map(i => endpoints[i].fenceId));
-    if (uniqueFences.size === 1 && cluster.length === 1) totalEndPosts++;
-    else totalCornerPosts++;
+  // ── Totals — summed from byType, which already accounts for shared corners
+  // vs. per-fence end posts via the cluster pass above. ──────────────────────
+  let totalEndPosts = 0, totalCornerPosts = 0, totalLinePosts = 0;
+  for (const acc of Object.values(byType) as FenceTypeSummary[]) {
+    totalEndPosts    += acc.endPosts;
+    totalCornerPosts += acc.cornerPosts;
+    totalLinePosts   += acc.linePosts;
   }
-  // Add all internal vertices across all fences
-  for (const f of fenceList) totalCornerPosts += Math.max(0, f.points.length / 2 - 2);
-
-  let totalLinePosts = 0;
-  for (const acc of Object.values(byType) as FenceTypeSummary[]) totalLinePosts += acc.linePosts;
 
   const totalLinearFt = Object.values(byType).reduce((s, a) => s + (a?.linearFt ?? 0), 0);
   const totalPosts    = totalEndPosts + totalCornerPosts + totalLinePosts + gatePosts;

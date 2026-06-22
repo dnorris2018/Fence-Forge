@@ -1,14 +1,15 @@
 import { Shape } from 'react-konva';
-import { catmullRomPath } from '../../utils/curveUtils';
+import { catmullRomPath, mixedPolyNativePath } from '../../utils/curveUtils';
+import type { SegmentCurveData } from '../../types/object';
 
-interface Props { points: number[]; curved?: boolean }
+interface Props { points: number[]; curved?: boolean; segmentCurveData?: SegmentCurveData[] }
 
 // Tile dimensions in world-space pixels
 const TILE_W = 100;  // ~5 ft
 const TILE_H = 140;  // ~7 ft  (portrait-oriented, matches reference)
 const GROUT  = 1.5;  // grout line thickness (unchanged)
 
-export function ConcretePadObject({ points, curved = false }: Props) {
+export function ConcretePadObject({ points, curved = false, segmentCurveData }: Props) {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (let i = 0; i < points.length; i += 2) {
     if (points[i]     < minX) minX = points[i];
@@ -23,9 +24,12 @@ export function ConcretePadObject({ points, curved = false }: Props) {
         const n = (ctx as any)._context as CanvasRenderingContext2D;
 
         const nv = points.length / 2;
+        const hasSegCurves = segmentCurveData?.some(s => s?.curved);
         function polyPath() {
           n.beginPath();
-          if (curved) {
+          if (hasSegCurves) {
+            mixedPolyNativePath(n, points, segmentCurveData ?? [], true);
+          } else if (curved) {
             catmullRomPath(n, points, true);
           } else {
             for (let i = 0; i < nv; i++) n[i === 0 ? 'moveTo' : 'lineTo'](points[i*2], points[i*2+1]);

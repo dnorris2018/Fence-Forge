@@ -1,5 +1,6 @@
 import { Shape } from 'react-konva';
-import { catmullRomPath } from '../../utils/curveUtils';
+import { catmullRomPath, mixedPolyNativePath } from '../../utils/curveUtils';
+import type { SegmentCurveData } from '../../types/object';
 
 const COPING = 20;
 
@@ -100,9 +101,9 @@ function drawWater(
   n.restore();
 }
 
-interface Props { points: number[]; curved?: boolean }
+interface Props { points: number[]; curved?: boolean; segmentCurveData?: SegmentCurveData[] }
 
-export function FreeformPoolObject({ points, curved = false }: Props) {
+export function FreeformPoolObject({ points, curved = false, segmentCurveData }: Props) {
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (let i = 0; i < points.length; i += 2) {
     if (points[i]     < minX) minX = points[i];
@@ -117,9 +118,12 @@ export function FreeformPoolObject({ points, curved = false }: Props) {
         const n = (ctx as any)._context as CanvasRenderingContext2D;
         const nv = points.length / 2;
 
+        const hasSegCurves = segmentCurveData?.some(s => s?.curved);
         function makePath() {
           n.beginPath();
-          if (curved) {
+          if (hasSegCurves) {
+            mixedPolyNativePath(n, points, segmentCurveData ?? [], true);
+          } else if (curved) {
             catmullRomPath(n, points, true);
           } else {
             for (let i = 0; i < nv; i++) n[i === 0 ? 'moveTo' : 'lineTo'](points[i*2], points[i*2+1]);

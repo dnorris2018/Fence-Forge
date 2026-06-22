@@ -11,4 +11,10 @@ export const OBJECT_DEFAULTS: Record<ObjectType, { label: string; width: number;
   'building':      { label: 'Building',    width: 0,                    height: 0,                    icon: '🏢' },
   'house':         { label: 'House',       width: 30 * PIXELS_PER_FOOT, height: 20 * PIXELS_PER_FOOT, icon: '🏠' },
   'label-text':    { label: 'Text Label',  width: 10 * PIXELS_PER_FOOT, height:  3 * PIXELS_PER_FOOT, icon: '🔤' },
+  'measure-line':  { label: 'Measure Line', width: 10 * PIXELS_PER_FOOT, height:  0,                  icon: '📏' },
+  'power-outlet':  { label: 'Power',        width:  3 * PIXELS_PER_FOOT, height:  3 * PIXELS_PER_FOOT, icon: '⚡' },
+  'water-spigot':  { label: 'Water Spigot', width:  3 * PIXELS_PER_FOOT, height:  3 * PIXELS_PER_FOOT, icon: '🚿' },
+  'gas-line':      { label: 'Gas Line',     width:  0,                   height:  0,                   icon: '🔥' },
+  'internet-line': { label: 'Internet Line',width:  0,                   height:  0,                   icon: '🌐' },
+  'water-line':    { label: 'Water Line',   width:  0,                   height:  0,                   icon: '💧' },
 };

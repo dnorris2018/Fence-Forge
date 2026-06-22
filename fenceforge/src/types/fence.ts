@@ -76,16 +76,35 @@ export const ORNAMENTAL_STYLES: { key: OrnamentalStyle; label: string }[] = [
   { key: 'spear-top', label: 'Spear Top' },
 ];
 
+export interface FenceCurveData {
+  curved: boolean;
+  cp1X: number; cp1Y: number;
+  cp2X: number; cp2Y: number;
+}
+
 export interface FenceLine {
   id: string;
   points: number[];        // flat [x0,y0,x1,y1,...] in world px
   fenceType: FenceTypeKey;
-  finishSide: 'left' | 'right';
+  finishSide: 'left' | 'right'; // fence-wide default, used when finishSides[i] is unset
+  finishSides?: ('left' | 'right')[]; // per-segment override, indexed by segment
   heightFt?: FenceHeight;  // used by wood-privacy, ranch-rail, cap-board, chain-link, ornamental
   fenceStyle?: FenceStyle; // used by types with style variants
   color?: string;          // user-chosen hex color; falls back to fence type default
   /** Terrain elevation at each vertex in feet (same length as points/2). Default 0. */
   elevations?: number[];
+  /** "Finished Side" label — independent of the line so it can be hidden or dragged, per segment. */
+  finishLabelHiddenSegs?: boolean[];
+  finishLabelOffsets?: { x: number; y: number }[];
+  /** Per-segment bezier curve data (indexed by segment). */
+  curveData?: FenceCurveData[];
+  /** Line post spacing override in feet (ornamental only: 6 or 8). */
+  linePostSpacingFt?: number;
+}
+
+/** The effective finish side for a given segment, falling back to the fence-wide default. */
+export function getFinishSide(fence: FenceLine, segIdx: number): 'left' | 'right' {
+  return fence.finishSides?.[segIdx] ?? fence.finishSide;
 }
 
 export interface FenceTypeDefinition {

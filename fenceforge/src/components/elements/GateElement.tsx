@@ -2,8 +2,10 @@ import { useRef } from 'react';
 import { Group, Line, Circle, Arc, Text } from 'react-konva';
 import type Konva from 'konva';
 import type { Gate, FenceLine } from '../../types';
+import { getFinishSide } from '../../types';
 import { FENCE_TYPES, getFenceColor } from '../../constants/fenceTypes';
 import { computeGateGeometry } from '../../utils/gateGeometry';
+import { closestSegmentOnFence } from '../../utils/geometry';
 
 interface Props {
   gate: Gate;
@@ -15,22 +17,11 @@ interface Props {
   labelFontSize?: number;
 }
 
-/** Project (x,y) onto the nearest point on the fence polyline; returns segment index + t */
-function projectToFence(x: number, y: number, points: number[]) {
-  let bestDist = Infinity;
-  let best: { segIdx: number; t: number; px: number; py: number } | null = null;
-  for (let si = 0; si < points.length / 2 - 1; si++) {
-    const x1 = points[si * 2], y1 = points[si * 2 + 1];
-    const x2 = points[si * 2 + 2], y2 = points[si * 2 + 3];
-    const dx = x2 - x1, dy = y2 - y1;
-    const lenSq = dx * dx + dy * dy;
-    if (lenSq === 0) continue;
-    const t = Math.max(0, Math.min(1, ((x - x1) * dx + (y - y1) * dy) / lenSq));
-    const px = x1 + t * dx, py = y1 + t * dy;
-    const dist = Math.hypot(x - px, y - py);
-    if (dist < bestDist) { bestDist = dist; best = { segIdx: si, t, px, py }; }
-  }
-  return best;
+/** Project (x,y) onto the nearest point on the fence, honouring bezier curves */
+function projectToFence(x: number, y: number, fence: FenceLine) {
+  const result = closestSegmentOnFence(x, y, fence.points, fence.curveData);
+  if (!result) return null;
+  return { segIdx: result.segIndex, t: result.t, px: result.cx, py: result.cy };
 }
 
 export function GateElement({ gate, fence, isSelected, onSelect, updateGate, onBeforeEdit, labelFontSize = 11 }: Props) {
@@ -39,7 +30,7 @@ export function GateElement({ gate, fence, isSelected, onSelect, updateGate, onB
 
   if (!fence) return null;
 
-  const geo = computeGateGeometry(gate, fence.points, fence.finishSide);
+  const geo = computeGateGeometry(gate, fence.points, getFinishSide(fence, gate.segmentIndex), fence.curveData);
   if (!geo) return null;
 
   const def = FENCE_TYPES[gate.fenceType];
@@ -70,7 +61,7 @@ export function GateElement({ gate, fence, isSelected, onSelect, updateGate, onB
     const stage = node.getStage();
     const pos = stage?.getRelativePointerPosition();
     if (pos) {
-      const pt = projectToFence(pos.x, pos.y, fence.points);
+      const pt = projectToFence(pos.x, pos.y, fence);
       if (pt) updateGate(gate.id, { segmentIndex: pt.segIdx, positionT: pt.t });
     }
     // Reset group back to origin every frame
@@ -244,7 +235,7 @@ export function GateElement({ gate, fence, isSelected, onSelect, updateGate, onB
         const cy = (geo.hingeY + geo.latchY) / 2;
         const labelFlipped = geo.fenceAngleDeg > 90 || geo.fenceAngleDeg < -90;
         const labelAngle = labelFlipped ? geo.fenceAngleDeg + 180 : geo.fenceAngleDeg;
-        const interiorSign = fence.finishSide === 'left' ? -1 : 1;
+        const interiorSign = getFinishSide(fence, gate.segmentIndex) === 'left' ? -1 : 1;
         const swingSign = gate.swingDirection === 'inward' ? interiorSign : -interiorSign;
         const labelOffset = def.strokeWidth / 2 + labelFontSize + 1;
         const text = `${gate.widthFt}'`;

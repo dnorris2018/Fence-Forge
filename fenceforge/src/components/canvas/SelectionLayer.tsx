@@ -20,8 +20,8 @@ export function SelectionLayer({ stageRef, selectedId, selectedType }: Props) {
 
     if (selectedType === 'object' && selectedId) {
       const obj = useCanvasStore.getState().objects[selectedId];
-      // Attach Transformer only for rect-based objects (no polygon points)
-      if (obj && !obj.points) {
+      // Attach Transformer only for rect-based objects (no polygon points, not a measure line)
+      if (obj && !obj.points && obj.objectType !== 'measure-line') {
         const node = stage.findOne('#' + selectedId);
         if (node) {
           tr.nodes([node]);

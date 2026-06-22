@@ -8,9 +8,11 @@ interface Props {
   selectedId: string | null;
   selectedType: SelectionType;
   setSelection: (id: string, type: SelectionType) => void;
+  selectedPolySegment: number | null;
+  setSelectedPolySegment: (idx: number | null) => void;
 }
 
-export function ObjectLayer({ objects, selectedId, selectedType, setSelection }: Props) {
+export function ObjectLayer({ objects, selectedId, selectedType, setSelection, selectedPolySegment, setSelectedPolySegment }: Props) {
   const objList = Object.values(objects);
   return (
     <Layer>
@@ -28,7 +30,9 @@ export function ObjectLayer({ objects, selectedId, selectedType, setSelection }:
           key={obj.id}
           obj={obj}
           isSelected={selectedType === 'object' && selectedId === obj.id}
-          onSelect={() => setSelection(obj.id, 'object')}
+          onSelect={() => { setSelection(obj.id, 'object'); setSelectedPolySegment(null); }}
+          selectedPolySegment={selectedType === 'object' && selectedId === obj.id ? selectedPolySegment : null}
+          onSelectSegment={(idx) => { setSelection(obj.id, 'object'); setSelectedPolySegment(idx); }}
         />
       ))}
     </Layer>

@@ -3,7 +3,7 @@ import Konva from 'konva';
 import { useCanvasStore } from '../store/canvasStore';
 import { useUiStore } from '../store/uiStore';
 import { useHistory } from './useHistory';
-import { closestSegmentOnPolyline } from '../utils/geometry';
+import { closestSegmentOnFence } from '../utils/geometry';
 import { PIXELS_PER_FOOT, SNAP_VERTEX_RADIUS } from '../constants/canvas';
 import { isPolyObjectType } from '../types/object';
 
@@ -73,7 +73,7 @@ export function useCanvasInteraction(stageRef: React.RefObject<Konva.Stage | nul
         saveHistory();
         const id = store.addObject(store.activeObjectType, rx, ry);
         store.setSelection(id, 'object');
-        store.setToolMode('select');
+        store.setToolMode('pan');
       }
       return;
     }
@@ -87,7 +87,7 @@ export function useCanvasInteraction(stageRef: React.RefObject<Konva.Stage | nul
       const fences = Object.values(store.fences);
       let bestFence = null, bestSeg = null, bestD = 60;
       for (const fence of fences) {
-        const result = closestSegmentOnPolyline(rx, ry, fence.points);
+        const result = closestSegmentOnFence(rx, ry, fence.points, fence.curveData);
         if (result && result.d < bestD) {
           bestD = result.d;
           bestFence = fence;
@@ -107,7 +107,7 @@ export function useCanvasInteraction(stageRef: React.RefObject<Konva.Stage | nul
           fenceType: bestFence.fenceType,
         });
         store.setSelection(id, 'gate');
-        store.setToolMode('select');
+        store.setToolMode('pan');
       }
       return;
     }
@@ -128,7 +128,7 @@ export function useCanvasInteraction(stageRef: React.RefObject<Konva.Stage | nul
       const id = store.addFence(pts, store.activeFenceType);
       useCanvasStore.setState({ drawingPoints: [], cursorPoint: null });
       store.setSelection(id, 'fence');
-      store.setToolMode('select');
+      store.setToolMode('pan');
     }
 
     if (store.toolMode === 'draw-poly-object') {
@@ -136,6 +136,7 @@ export function useCanvasInteraction(stageRef: React.RefObject<Konva.Stage | nul
       saveHistory();
       const id = getFreshStore().finishPolyObject();
       if (id) getFreshStore().setSelection(id, 'object');
+      getFreshStore().setToolMode('pan');
     }
   }
 

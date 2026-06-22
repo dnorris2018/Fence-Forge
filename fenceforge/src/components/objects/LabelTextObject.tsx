@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Text, Rect, Line, Circle, Group } from 'react-konva';
+import { Text, Rect, Circle, Group, Arrow } from 'react-konva';
 import type Konva from 'konva';
 import type { PlaceableObject } from '../../types';
 import { useCanvasStore } from '../../store/canvasStore';
@@ -70,7 +70,6 @@ export function LabelTextArrow({ obj, isSelected }: ArrowProps) {
   const edgeWorldX = x + edgeLocal.x;
   const edgeWorldY = y + edgeLocal.y;
 
-  const dotColor = isSelected ? '#FFD700' : '#333';
   const lineColor = isSelected ? '#FFD700' : '#444';
 
   function handleTipDragStart() {
@@ -92,22 +91,15 @@ export function LabelTextArrow({ obj, isSelected }: ArrowProps) {
 
   return (
     <Group listening={isSelected}>
-      {/* Leader line */}
-      <Line
+      {/* Leader line with arrowhead at the tip */}
+      <Arrow
         points={[edgeWorldX, edgeWorldY, tipWorldX, tipWorldY]}
         stroke={lineColor}
         strokeWidth={2}
+        fill={lineColor}
+        pointerLength={12}
+        pointerWidth={10}
         lineCap="round"
-        listening={false}
-      />
-
-      {/* Dot at the tip */}
-      <Circle
-        x={tipWorldX} y={tipWorldY}
-        radius={9}
-        fill={dotColor}
-        stroke="#fff"
-        strokeWidth={1.5}
         listening={false}
       />
 

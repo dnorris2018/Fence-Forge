@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useRef, useEffect, useState, useCallback, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { Stage } from 'react-konva';
 import type Konva from 'konva';
 import { useUiStore } from '../../store/uiStore';
@@ -14,13 +14,21 @@ import { FenceLayer } from './FenceLayer';
 import { GateLayer } from './GateLayer';
 import { DrawingLayer } from './DrawingLayer';
 import { SelectionLayer } from './SelectionLayer';
+import { ContextMenu, type MenuEntry } from '../ui/ContextMenu';
+import { setClipboard, getClipboard } from '../../store/clipboard';
+import { closestSegmentOnFence } from '../../utils/geometry';
+import { nanoid } from 'nanoid';
+import type { FenceCurveData, FenceHeight, FenceStyle } from '../../types';
+import { HEIGHT_OPTIONS_MAP, STYLE_OPTIONS_MAP } from '../panels/FenceProperties';
 
 export function CanvasArea() {
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<Konva.Stage>(null);
   const [size, setSize] = useState({ width: 800, height: 600 });
+  const [ctxMenu, setCtxMenu] = useState<{ sx: number; sy: number; wx: number; wy: number } | null>(null);
+  const closeCtxMenu = useCallback(() => setCtxMenu(null), []);
 
-  const { zoom, panX, panY, setZoom, setPan, gridVisible, snapSizeFt, snapEnabled, labelFontSize } = useUiStore();
+  const { zoom, panX, panY, setZoom, setPan, gridVisible, snapSizeFt, snapEnabled, labelFontSize, selectedPolySegment, setSelectedPolySegment } = useUiStore();
   const toolMode      = useCanvasStore(s => s.toolMode);
   const fences        = useCanvasStore(s => s.fences);
   const gates         = useCanvasStore(s => s.gates);
@@ -95,11 +103,13 @@ export function CanvasArea() {
         history.pushSnapshot(canvas.getSnapshot());
         const id = canvas.finishDrawing();
         if (id) canvas.setSelection(id, 'fence');
+        canvas.setToolMode('pan');
       } else if (canvas.toolMode === 'draw-poly-object' && canvas.drawingPoints.length >= 6) {
         e.preventDefault();
         history.pushSnapshot(canvas.getSnapshot());
         const id = canvas.finishPolyObject();
         if (id) canvas.setSelection(id, 'object');
+        canvas.setToolMode('pan');
       }
       return;
     }
@@ -158,11 +168,16 @@ export function CanvasArea() {
 
   const isPanning = useRef(false);
   const lastPan = useRef({ x: 0, y: 0 });
+  const panStartPos = useRef({ x: 0, y: 0 });
 
   function handleStageMouseDown(e: Konva.KonvaEventObject<MouseEvent>) {
-    if (e.evt.button === 1 || toolMode === 'pan') {
+    // Middle-mouse always pans; pan tool pans only on background (stage) clicks so
+    // gates and fence lines remain draggable/selectable in pan mode too.
+    const clickedBackground = e.target === (e.target.getStage() as unknown);
+    if (e.evt.button === 1 || (toolMode === 'pan' && clickedBackground)) {
       isPanning.current = true;
       lastPan.current = { x: e.evt.clientX, y: e.evt.clientY };
+      panStartPos.current = { x: e.evt.clientX, y: e.evt.clientY };
       return;
     }
     handleMouseDown(e);
@@ -179,8 +194,228 @@ export function CanvasArea() {
     handleMouseMove();
   }
 
-  function handleStageMouseUp() {
+  function handleStageMouseUp(e: Konva.KonvaEventObject<MouseEvent>) {
+    if (isPanning.current && toolMode === 'pan') {
+      const dx = e.evt.clientX - panStartPos.current.x;
+      const dy = e.evt.clientY - panStartPos.current.y;
+      // Click (no significant drag) — deselect
+      if (Math.sqrt(dx * dx + dy * dy) < 5) {
+        useCanvasStore.getState().clearSelection();
+        setSelectedPolySegment(null);
+      }
+    }
     isPanning.current = false;
+  }
+
+  function handleContextMenu(e: Konva.KonvaEventObject<PointerEvent>) {
+    e.evt.preventDefault();
+    const stage = stageRef.current;
+    const pos = stage?.getRelativePointerPosition();
+    if (!pos) return;
+    setCtxMenu({ sx: e.evt.clientX, sy: e.evt.clientY, wx: pos.x, wy: pos.y });
+  }
+
+  function buildMenuItems(): MenuEntry[] {
+    const canvas = useCanvasStore.getState();
+    const history = useHistoryStore.getState();
+    const { selectedId, selectedType } = canvas;
+    const clip = getClipboard();
+
+    function pushHistory() {
+      history.pushSnapshot(canvas.getSnapshot());
+    }
+
+    function doCopy() {
+      if (!selectedId) return;
+      if (selectedType === 'fence' && canvas.fences[selectedId]) {
+        const { id: _id, ...data } = canvas.fences[selectedId];
+        setClipboard({ kind: 'fence', data });
+      } else if (selectedType === 'object' && canvas.objects[selectedId]) {
+        const { id: _id, ...data } = canvas.objects[selectedId];
+        setClipboard({ kind: 'object', data });
+      } else if (selectedType === 'gate' && canvas.gates[selectedId]) {
+        const { id: _id, ...data } = canvas.gates[selectedId];
+        setClipboard({ kind: 'gate', data });
+      }
+    }
+
+    function doCut() {
+      doCopy();
+      pushHistory();
+      if (!selectedId) return;
+      if (selectedType === 'fence')  canvas.deleteFence(selectedId);
+      if (selectedType === 'object') canvas.deleteObject(selectedId);
+      if (selectedType === 'gate')   canvas.deleteGate(selectedId);
+      canvas.clearSelection();
+    }
+
+    function doPaste() {
+      if (!clip) return;
+      pushHistory();
+      const OFFSET = 20;
+      const wx = ctxMenu?.wx ?? 0, wy = ctxMenu?.wy ?? 0;
+      if (clip.kind === 'fence') {
+        const pts = clip.data.points.map((v, i) => v + (i % 2 === 0 ? OFFSET : OFFSET));
+        const id = canvas.addFence(pts, clip.data.fenceType);
+        canvas.updateFence(id, { ...clip.data, id, points: pts });
+        canvas.setSelection(id, 'fence');
+      } else if (clip.kind === 'object') {
+        const id = nanoid();
+        const obj = { ...clip.data, id, x: wx - clip.data.width / 2, y: wy - clip.data.height / 2 };
+        useCanvasStore.setState(s => ({ objects: { ...s.objects, [id]: obj } }));
+        canvas.setSelection(id, 'object');
+      } else if (clip.kind === 'gate') {
+        const id = canvas.addGate({ ...clip.data });
+        canvas.setSelection(id, 'gate');
+      }
+    }
+
+    const hasSelection = !!selectedId;
+    const isFence = selectedType === 'fence' && !!selectedId;
+
+    const items: MenuEntry[] = [
+      { label: 'Cut',   shortcut: 'Ctrl+X', icon: '✂', disabled: !hasSelection, action: doCut },
+      { label: 'Copy',  shortcut: 'Ctrl+C', icon: '⧉', disabled: !hasSelection, action: doCopy },
+      { label: 'Paste', shortcut: 'Ctrl+V', icon: '📋', disabled: !clip,         action: doPaste },
+      { separator: true },
+      { label: 'Delete', shortcut: 'Del', icon: '🗑', disabled: !hasSelection, action: () => {
+        if (!selectedId) return;
+        pushHistory();
+        if (selectedType === 'fence')  canvas.deleteFence(selectedId);
+        if (selectedType === 'object') canvas.deleteObject(selectedId);
+        if (selectedType === 'gate')   canvas.deleteGate(selectedId);
+        canvas.clearSelection();
+      }},
+    ];
+
+    if (isFence) {
+      const fence = canvas.fences[selectedId];
+      const numSegs = fence.points.length / 2 - 1;
+      items.push({ separator: true });
+
+      // Find segment closest to right-click
+      const seg = ctxMenu ? closestSegmentOnFence(ctxMenu.wx, ctxMenu.wy, fence.points, fence.curveData) : null;
+      const segIdx = seg?.segIndex ?? 0;
+      const segIsCurved = fence.curveData?.[segIdx]?.curved ?? false;
+
+      items.push({
+        label: segIsCurved ? 'Straighten Segment' : 'Arc Segment',
+        icon: '⌒',
+        action: () => {
+          pushHistory();
+          const cur = fence.curveData ?? [];
+          const next: FenceCurveData[] = Array.from({ length: numSegs }, (_, i) =>
+            cur[i] ?? { curved: false, cp1X: 0, cp1Y: 0, cp2X: 0, cp2Y: 0 }
+          );
+          if (next[segIdx].curved) {
+            next[segIdx] = { ...next[segIdx], curved: false };
+          } else {
+            const x1 = fence.points[segIdx * 2], y1 = fence.points[segIdx * 2 + 1];
+            const x2 = fence.points[(segIdx + 1) * 2], y2 = fence.points[(segIdx + 1) * 2 + 1];
+            const dx = x2 - x1, dy = y2 - y1, len = Math.sqrt(dx*dx+dy*dy);
+            const perpX = len > 0 ? -dy/len : 0, perpY = len > 0 ? dx/len : 0;
+            const offset = len * 0.25;
+            next[segIdx] = { curved: true, cp1X: x1+dx/3+perpX*offset, cp1Y: y1+dy/3+perpY*offset, cp2X: x1+2*dx/3+perpX*offset, cp2Y: y1+2*dy/3+perpY*offset };
+          }
+          canvas.updateFence(selectedId, { curveData: next });
+        },
+      });
+
+      const allCurved = Array.from({ length: numSegs }, (_, i) => fence.curveData?.[i]?.curved ?? false).every(Boolean);
+      items.push({
+        label: allCurved ? 'Straighten All' : 'Round All Corners',
+        icon: '◯',
+        action: () => {
+          pushHistory();
+          if (allCurved) {
+            canvas.updateFence(selectedId, { curveData: undefined });
+          } else {
+            const next: FenceCurveData[] = Array.from({ length: numSegs }, (_, i) => {
+              const cur = fence.curveData?.[i];
+              if (cur?.curved) return cur;
+              const x1 = fence.points[i*2], y1 = fence.points[i*2+1];
+              const x2 = fence.points[(i+1)*2], y2 = fence.points[(i+1)*2+1];
+              const dx = x2-x1, dy = y2-y1, len = Math.sqrt(dx*dx+dy*dy);
+              const perpX = len > 0 ? -dy/len : 0, perpY = len > 0 ? dx/len : 0;
+              const offset = len * 0.25;
+              return { curved: true, cp1X: x1+dx/3+perpX*offset, cp1Y: y1+dy/3+perpY*offset, cp2X: x1+2*dx/3+perpX*offset, cp2Y: y1+2*dy/3+perpY*offset };
+            });
+            canvas.updateFence(selectedId, { curveData: next });
+          }
+        },
+      });
+
+      items.push({
+        label: 'Reset Caption Position',
+        icon: '↺',
+        disabled: !fence.finishLabelOffsets?.some(o => o?.x || o?.y),
+        action: () => {
+          pushHistory();
+          canvas.updateFence(selectedId, { finishLabelOffsets: undefined });
+        },
+      });
+
+      // Height submenu
+      const heightOptions = HEIGHT_OPTIONS_MAP[fence.fenceType];
+      if (heightOptions) {
+        items.push({ separator: true });
+        const currentH = fence.heightFt ?? heightOptions[0];
+        items.push({
+          label: `Height: ${currentH}'`,
+          icon: '↕',
+          submenu: heightOptions.map(h => ({
+            label: `${h}'`,
+            icon: currentH === h ? '✓' : ' ',
+            action: () => { pushHistory(); canvas.updateFence(selectedId, { heightFt: h as FenceHeight }); },
+          })),
+        });
+      }
+
+      // Style submenu
+      const styleOptions = STYLE_OPTIONS_MAP[fence.fenceType];
+      if (styleOptions) {
+        if (!heightOptions) items.push({ separator: true });
+        const currentS = fence.fenceStyle ?? styleOptions[0].key;
+        const currentSLabel = styleOptions.find(o => o.key === currentS)?.label ?? currentS;
+        items.push({
+          label: `Style: ${currentSLabel}`,
+          icon: '▤',
+          submenu: styleOptions.map(opt => ({
+            label: opt.label,
+            icon: currentS === opt.key ? '✓' : ' ',
+            action: () => { pushHistory(); canvas.updateFence(selectedId, { fenceStyle: opt.key as FenceStyle }); },
+          })),
+        });
+      }
+
+      items.push({ separator: true });
+      items.push({
+        label: 'Flip Finish Side',
+        icon: '↔',
+        action: () => {
+          pushHistory();
+          canvas.updateFence(selectedId, { finishSide: fence.finishSide === 'left' ? 'right' : 'left', finishSides: undefined });
+        },
+      });
+
+      if (seg !== null) {
+        const currentSide = fence.finishSides?.[segIdx] ?? fence.finishSide;
+        items.push({
+          label: `Flip Seg ${segIdx + 1} Finish Side`,
+          icon: '↕',
+          action: () => {
+            pushHistory();
+            const numSegs = fence.points.length / 2 - 1;
+            const getFinishSide = (i: number) => fence.finishSides?.[i] ?? fence.finishSide;
+            const next = Array.from({ length: numSegs }, (_, i) => getFinishSide(i)) as ('left' | 'right')[];
+            next[segIdx] = currentSide === 'left' ? 'right' : 'left';
+            canvas.updateFence(selectedId, { finishSides: next });
+          },
+        });
+      }
+    }
+
+    return items;
   }
 
   const cursor =
@@ -211,6 +446,7 @@ export function CanvasArea() {
         onMouseMove={handleStageMouseMove}
         onMouseUp={handleStageMouseUp}
         onDblClick={handleDblClick}
+        onContextMenu={handleContextMenu}
       >
         <GridLayer
           width={size.width}
@@ -226,6 +462,8 @@ export function CanvasArea() {
           selectedId={selectedId}
           selectedType={selectedType}
           setSelection={setSelection}
+          selectedPolySegment={selectedPolySegment}
+          setSelectedPolySegment={setSelectedPolySegment}
         />
         <FenceLayer
           fences={fences}
@@ -245,7 +483,7 @@ export function CanvasArea() {
           selectedId={selectedId}
           selectedType={selectedType}
           setSelection={setSelection}
-          updateGate={toolMode === 'select' ? updateGate : undefined}
+          updateGate={toolMode === 'select' || toolMode === 'pan' ? updateGate : undefined}
           onBeforeEdit={handleBeforeEdit}
           labelFontSize={labelFontSize}
         />
@@ -263,6 +501,14 @@ export function CanvasArea() {
           selectedType={selectedType}
         />
       </Stage>
+      {ctxMenu && (
+        <ContextMenu
+          x={ctxMenu.sx}
+          y={ctxMenu.sy}
+          items={buildMenuItems()}
+          onClose={closeCtxMenu}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import { Group, Shape, Line } from 'react-konva';
-import { catmullRomSample } from '../../utils/curveUtils';
+import { catmullRomSample, sampleMixedPolyline } from '../../utils/curveUtils';
+import type { SegmentCurveData } from '../../types/object';
 
 const WALL_W  = 32;
 const CAP_H   = Math.round(WALL_W * 0.18);
@@ -66,10 +67,16 @@ interface Props {
   isSelected: boolean;
   capSide?: 'top' | 'bottom';
   curved?: boolean;
+  segmentCurveData?: SegmentCurveData[];
 }
 
-export function BrickWallObject({ points, isSelected, capSide = 'top', curved = false }: Props) {
-  const dense = curved ? catmullRomSample(points, false, 6) : points;
+export function BrickWallObject({ points, isSelected, capSide = 'top', curved = false, segmentCurveData }: Props) {
+  const hasSegCurves = segmentCurveData?.some(s => s?.curved);
+  const dense = hasSegCurves
+    ? sampleMixedPolyline(points, segmentCurveData ?? [], false, 6)
+    : curved
+      ? catmullRomSample(points, false, 6)
+      : points;
   const numDense = dense.length / 2;
 
   // Outline polygon for the selection Line uses the dense curve edges

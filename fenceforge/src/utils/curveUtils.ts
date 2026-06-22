@@ -3,6 +3,103 @@
  * All functions expect points as flat [x0,y0,x1,y1,...] arrays.
  */
 
+import type { SegmentCurveData } from '../types/object';
+
+/**
+ * Sample a mixed straight/bezier polyline into a dense flat point array.
+ * Curved segments (with bezier CPs) are sampled parametrically; straight segments stay as-is.
+ */
+export function sampleMixedPolyline(
+  pts: number[],
+  segCurveData: (SegmentCurveData | undefined)[],
+  closed: boolean,
+  step = 6,
+): number[] {
+  const nv = pts.length / 2;
+  if (nv < 2) return pts.slice();
+  const result: number[] = [];
+  const numSegs = closed ? nv : nv - 1;
+  for (let i = 0; i < numSegs; i++) {
+    const ni = (i + 1) % nv;
+    const x1 = pts[i * 2], y1 = pts[i * 2 + 1];
+    const x2 = pts[ni * 2], y2 = pts[ni * 2 + 1];
+    const cd = segCurveData[i];
+    if (cd?.curved) {
+      const dx = x2 - x1, dy = y2 - y1;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const steps = Math.max(2, Math.ceil(len / step));
+      for (let k = 0; k < steps; k++) {
+        const t = k / steps;
+        const mt = 1 - t;
+        result.push(
+          mt*mt*mt*x1 + 3*mt*mt*t*cd.cp1X + 3*mt*t*t*cd.cp2X + t*t*t*x2,
+          mt*mt*mt*y1 + 3*mt*mt*t*cd.cp1Y + 3*mt*t*t*cd.cp2Y + t*t*t*y2,
+        );
+      }
+    } else {
+      result.push(x1, y1);
+    }
+  }
+  // Append the final endpoint
+  const lastIdx = closed ? 0 : nv - 1;
+  result.push(pts[lastIdx * 2], pts[lastIdx * 2 + 1]);
+  return result;
+}
+
+/**
+ * Build an SVG path string with per-segment control: straight lines or explicit bezier curves.
+ * Segments not in segCurveData (or not marked curved) become L commands.
+ */
+export function mixedPolySvgPath(
+  pts: number[],
+  segCurveData: (SegmentCurveData | undefined)[],
+  closed: boolean,
+): string {
+  const nv = pts.length / 2;
+  if (nv < 2) return '';
+  let d = `M ${pts[0].toFixed(1)} ${pts[1].toFixed(1)}`;
+  const numSegs = closed ? nv : nv - 1;
+  for (let i = 0; i < numSegs; i++) {
+    const ni = (i + 1) % nv;
+    const x2 = pts[ni * 2], y2 = pts[ni * 2 + 1];
+    const cd = segCurveData[i];
+    if (cd?.curved) {
+      d += ` C ${cd.cp1X.toFixed(1)} ${cd.cp1Y.toFixed(1)} ${cd.cp2X.toFixed(1)} ${cd.cp2Y.toFixed(1)} ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+    } else {
+      d += ` L ${x2.toFixed(1)} ${y2.toFixed(1)}`;
+    }
+  }
+  if (closed) d += ' Z';
+  return d;
+}
+
+/**
+ * Draw a mixed straight/bezier poly path onto a CanvasRenderingContext2D.
+ * Caller must call beginPath() before; this adds moveTo + line/curve commands.
+ */
+export function mixedPolyNativePath(
+  n: CanvasRenderingContext2D,
+  pts: number[],
+  segCurveData: (SegmentCurveData | undefined)[],
+  closed: boolean,
+): void {
+  const nv = pts.length / 2;
+  if (nv < 2) return;
+  n.moveTo(pts[0], pts[1]);
+  const numSegs = closed ? nv : nv - 1;
+  for (let i = 0; i < numSegs; i++) {
+    const ni = (i + 1) % nv;
+    const x2 = pts[ni * 2], y2 = pts[ni * 2 + 1];
+    const cd = segCurveData[i];
+    if (cd?.curved) {
+      n.bezierCurveTo(cd.cp1X, cd.cp1Y, cd.cp2X, cd.cp2Y, x2, y2);
+    } else {
+      n.lineTo(x2, y2);
+    }
+  }
+  if (closed) n.closePath();
+}
+
 function ctrlPt(pts: number[], i: number, n: number, closed: boolean): [number, number] {
   if (closed) i = ((i % n) + n) % n;
   else i = Math.max(0, Math.min(n - 1, i));

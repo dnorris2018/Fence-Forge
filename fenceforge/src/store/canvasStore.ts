@@ -63,7 +63,7 @@ export const useCanvasStore = create<CanvasStore>()(persist((set, get) => ({
   gates: {},
   objects: {},
 
-  toolMode: 'select',
+  toolMode: 'pan',
   activeFenceType: 'wood-privacy',
   activeObjectType: 'bush',
   activeGateType: 'single-swing',
@@ -78,7 +78,7 @@ export const useCanvasStore = create<CanvasStore>()(persist((set, get) => ({
     const id = nanoid();
     const extras: { heightFt?: FenceHeight; fenceStyle?: FenceStyle } = {};
     switch (fenceType) {
-      case 'wood-privacy':     extras.heightFt = 6; extras.fenceStyle = 'shadow-box'; break;
+      case 'wood-privacy':     extras.heightFt = 6; extras.fenceStyle = 'standard'; break;
       case 'wood-cap-board':   extras.heightFt = 6; extras.fenceStyle = 'flush';      break;
       case 'ranch-rail':       extras.heightFt = 4; extras.fenceStyle = '3-board';    break;
       case 'vinyl-privacy':    extras.fenceStyle = '6-panel';  break;
@@ -119,10 +119,12 @@ export const useCanvasStore = create<CanvasStore>()(persist((set, get) => ({
   addObject: (objectType, x, y, polyPoints?) => {
     const id = nanoid();
     const def = OBJECT_DEFAULTS[objectType];
+    const baseX = polyPoints ? x : x - def.width  / 2;
+    const baseY = polyPoints ? y : y - def.height / 2;
     const obj: PlaceableObject = {
       id, objectType,
-      x: polyPoints ? x : x - def.width  / 2,
-      y: polyPoints ? y : y - def.height / 2,
+      x: baseX,
+      y: baseY,
       width: def.width,
       height: def.height,
       rotation: 0,
@@ -131,13 +133,14 @@ export const useCanvasStore = create<CanvasStore>()(persist((set, get) => ({
       ...(objectType === 'brick-wall' ? { capSide: 'top' as const }       : {}),
       ...(objectType === 'building'   ? { entranceEdge: 0 }              : {}),
       ...(objectType === 'house'      ? { houseStyle: 'rectangle' as const, houseFlipX: false } : {}),
+      ...(objectType === 'measure-line' ? { lineEndX: baseX + def.width, lineEndY: baseY } : {}),
     };
     set(s => ({ objects: { ...s.objects, [id]: obj } }));
     return id;
   },
   finishPolyObject: () => {
     const { drawingPoints, activeObjectType, addObject } = get();
-    const minPts = activeObjectType === 'brick-wall' ? 4 : 6;
+    const minPts = (activeObjectType === 'brick-wall' || activeObjectType === 'gas-line' || activeObjectType === 'internet-line' || activeObjectType === 'water-line') ? 4 : 6;
     if (drawingPoints.length < minPts) {
       set({ drawingPoints: [], cursorPoint: null, toolMode: 'select' });
       return null;
