@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react';
+﻿import { useRef, useEffect, useState } from 'react';
 import { useCanvasStore } from '../../store/canvasStore';
 import { useUiStore } from '../../store/uiStore';
 import { useHistory } from '../../hooks/useHistory';
@@ -121,51 +121,51 @@ export function ElevationView() {
   const selectedElev = elevs[elevationPostIdx] ?? 0;
 
   return (
-    <div className="flex flex-1 overflow-hidden bg-[#1a1f2e]">
+    <div className="flex flex-1 overflow-hidden bg-[var(--c-bg1)]">
       {/* ── Left settings panel ── */}
-      <div className="w-52 bg-gray-800 border-r border-gray-700 p-4 flex flex-col gap-4 shrink-0">
+      <div className="w-52 bg-[var(--c-bg2)] border-r border-[var(--c-border1)] p-4 flex flex-col gap-4 shrink-0">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-gray-400 uppercase tracking-widest font-semibold">Elevation Settings</p>
+          <p className="text-xs text-[var(--c-text3)] uppercase tracking-widest font-semibold">Elevation Settings</p>
           <button
             onClick={closeElevationView}
-            className="text-gray-500 hover:text-gray-300 text-xs transition-colors"
+            className="text-[var(--c-text3)] hover:text-[var(--c-text2)] text-xs transition-colors"
             title="Close elevation view"
           >✕</button>
         </div>
 
         {/* Post navigator */}
         <div className="flex flex-col gap-1">
-          <p className="text-xs text-gray-400">Change Posts</p>
+          <p className="text-xs text-[var(--c-text3)]">Change Posts</p>
           <div className="flex items-center gap-1">
             <button
               onClick={() => setElevationPostIdx(Math.max(0, elevationPostIdx - 1))}
               disabled={elevationPostIdx === 0}
-              className="w-8 h-8 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-30 text-white text-sm flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] disabled:opacity-30 text-[var(--c-text1)] text-sm flex items-center justify-center transition-colors"
             >−</button>
-            <div className="flex-1 h-8 bg-gray-700 rounded flex items-center justify-center">
-              <span className="text-sm text-white font-mono">{elevationPostIdx + 1}</span>
+            <div className="flex-1 h-8 bg-[var(--c-bg3)] rounded flex items-center justify-center">
+              <span className="text-sm text-[var(--c-text1)] font-mono">{elevationPostIdx + 1}</span>
             </div>
             <button
               onClick={() => setElevationPostIdx(Math.min(n - 1, elevationPostIdx + 1))}
               disabled={elevationPostIdx === n - 1}
-              className="w-8 h-8 rounded bg-gray-700 hover:bg-gray-600 disabled:opacity-30 text-white text-sm flex items-center justify-center transition-colors"
+              className="w-8 h-8 rounded bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] disabled:opacity-30 text-[var(--c-text1)] text-sm flex items-center justify-center transition-colors"
             >+</button>
           </div>
-          <p className="text-[10px] text-gray-500">Post {elevationPostIdx + 1} of {n}</p>
+          <p className="text-[10px] text-[var(--c-text3)]">Post {elevationPostIdx + 1} of {n}</p>
         </div>
 
         {/* Elevation height */}
         <div className="flex flex-col gap-1">
-          <p className="text-xs text-gray-400">Elevation Height (ft)</p>
+          <p className="text-xs text-[var(--c-text3)]">Elevation Height (ft)</p>
           <input
             type="number"
             min={0}
             step={0.5}
             value={selectedElev}
             onChange={e => setElevation(parseFloat(e.target.value) || 0)}
-            className="w-full bg-gray-700 text-gray-200 text-sm rounded px-3 py-1.5 border border-gray-600 focus:outline-none focus:border-teal-500"
+            className="w-full bg-[var(--c-bg3)] text-[var(--c-text2)] text-sm rounded px-3 py-1.5 border border-[var(--c-border2)] focus:outline-none focus:border-[var(--c-accent)]"
           />
-          <p className="text-[10px] text-gray-500 leading-snug">
+          <p className="text-[10px] text-[var(--c-text3)] leading-snug">
             Height difference the post must accommodate.
           </p>
         </div>
@@ -175,21 +175,21 @@ export function ElevationView() {
           <button
             onClick={addPost}
             disabled={n >= 50}
-            className="py-1.5 rounded text-xs bg-teal-700 hover:bg-teal-600 disabled:opacity-30 text-white transition-colors"
+            className="py-1.5 rounded text-xs bg-teal-700 hover:bg-teal-600 disabled:opacity-30 text-[var(--c-text1)] transition-colors"
           >
             + Add Post After
           </button>
           <button
             onClick={removePost}
             disabled={n <= 2 || elevationPostIdx === 0 || elevationPostIdx === n - 1}
-            className="py-1.5 rounded text-xs bg-gray-700 hover:bg-gray-600 disabled:opacity-30 text-gray-300 transition-colors"
+            className="py-1.5 rounded text-xs bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] disabled:opacity-30 text-[var(--c-text2)] transition-colors"
           >
             Remove Post
           </button>
         </div>
 
         <div className="mt-auto">
-          <p className="text-[10px] text-gray-600">
+          <p className="text-[10px] text-[var(--c-text4)]">
             {n} posts · {(totalDist / PIXELS_PER_FOOT).toFixed(1)} ft total
           </p>
         </div>

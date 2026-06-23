@@ -1,5 +1,7 @@
 import { create } from 'zustand';
 import { MIN_ZOOM, MAX_ZOOM } from '../constants/canvas';
+import type { ThemeKey } from '../constants/themes';
+import { DEFAULT_THEME } from '../constants/themes';
 
 interface UiStore {
   zoom: number;
@@ -8,26 +10,29 @@ interface UiStore {
   gridVisible: boolean;
   snapEnabled: boolean;
   snapSizeFt: number;
-  sidebarTab: 'fences' | 'objects';
-  /** Fence ID currently open in elevation view, or null for plan view */
+  sidebarTab: 'fences' | 'objects' | 'projects';
   elevationFenceId: string | null;
-  /** Index of the selected post in elevation view */
   elevationPostIdx: number;
-  /** Which segment of the selected poly object is highlighted for curve editing */
   selectedPolySegment: number | null;
+  labelFontSize: number;
+  theme: ThemeKey;
 
   setZoom: (z: number) => void;
   setPan: (x: number, y: number) => void;
   toggleGrid: () => void;
   toggleSnap: () => void;
   setSnapSize: (ft: number) => void;
-  setSidebarTab: (tab: 'fences' | 'objects') => void;
+  setSidebarTab: (tab: 'fences' | 'objects' | 'projects') => void;
   openElevationView: (fenceId: string) => void;
   closeElevationView: () => void;
   setElevationPostIdx: (idx: number) => void;
   setSelectedPolySegment: (idx: number | null) => void;
-  labelFontSize: number;
   setLabelFontSize: (size: number) => void;
+  setTheme: (key: ThemeKey) => void;
+}
+
+function loadTheme(): ThemeKey {
+  try { return (localStorage.getItem('ff-theme') as ThemeKey) ?? DEFAULT_THEME; } catch { return DEFAULT_THEME; }
 }
 
 export const useUiStore = create<UiStore>((set) => ({
@@ -42,6 +47,7 @@ export const useUiStore = create<UiStore>((set) => ({
   elevationPostIdx: 0,
   selectedPolySegment: null,
   labelFontSize: 11,
+  theme: loadTheme(),
 
   setZoom: (z) => set({ zoom: Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, z)) }),
   setPan: (x, y) => set({ panX: x, panY: y }),
@@ -54,4 +60,8 @@ export const useUiStore = create<UiStore>((set) => ({
   closeElevationView: () => set({ elevationFenceId: null, elevationPostIdx: 0 }),
   setElevationPostIdx: (idx) => set({ elevationPostIdx: idx }),
   setSelectedPolySegment: (idx) => set({ selectedPolySegment: idx }),
+  setTheme: (key) => {
+    try { localStorage.setItem('ff-theme', key); } catch {}
+    set({ theme: key });
+  },
 }));

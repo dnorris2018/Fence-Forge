@@ -1,4 +1,4 @@
-import { useCanvasStore } from '../../store/canvasStore';
+﻿import { useCanvasStore } from '../../store/canvasStore';
 import { useHistory } from '../../hooks/useHistory';
 
 interface Props { objectId: string; }
@@ -31,24 +31,24 @@ export function BuildingProperties({ objectId }: Props) {
 
   return (
     <div className="p-4 flex flex-col gap-4">
-      <p className="text-xs text-gray-400 uppercase tracking-wide">Building</p>
+      <p className="text-xs text-[var(--c-text3)] uppercase tracking-wide">Building</p>
 
       {numEdges > 0 && (
         <div className="flex flex-col gap-1">
-          <p className="text-xs text-gray-400">Entrance Wall</p>
+          <p className="text-xs text-[var(--c-text3)]">Entrance Wall</p>
           <div className="flex items-center gap-2">
             <button
               onClick={() => cycleEntrance(-1)}
-              className="flex-1 py-1 rounded text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors"
+              className="flex-1 py-1 rounded text-xs bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] text-[var(--c-text2)] transition-colors"
             >
               ←
             </button>
-            <span className="text-xs text-gray-300 w-14 text-center">
+            <span className="text-xs text-[var(--c-text2)] w-14 text-center">
               Wall {entranceEdge + 1} / {numEdges}
             </span>
             <button
               onClick={() => cycleEntrance(1)}
-              className="flex-1 py-1 rounded text-xs bg-gray-700 hover:bg-gray-600 text-gray-300 transition-colors"
+              className="flex-1 py-1 rounded text-xs bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] text-[var(--c-text2)] transition-colors"
             >
               →
             </button>
@@ -58,7 +58,7 @@ export function BuildingProperties({ objectId }: Props) {
 
       <button
         onClick={handleDelete}
-        className="mt-auto py-1 px-3 rounded text-xs bg-red-800 hover:bg-red-700 text-white transition-colors"
+        className="mt-auto py-1 px-3 rounded text-xs bg-red-800 hover:bg-red-700 text-[var(--c-text1)] transition-colors"
       >
         Delete Building
       </button>

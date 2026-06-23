@@ -355,6 +355,37 @@ export function CanvasArea() {
         },
       });
 
+      {
+        const allHidden = Array.from({ length: numSegs }, (_, i) => fence.finishLabelHiddenSegs?.[i] ?? false);
+        const hideSubmenu = [
+          {
+            label: allHidden.every(Boolean) ? 'Show All' : 'Hide All',
+            icon: '👁',
+            action: () => {
+              pushHistory();
+              const hide = !allHidden.every(Boolean);
+              canvas.updateFence(selectedId, { finishLabelHiddenSegs: Array(numSegs).fill(hide) });
+            },
+          },
+          ...(numSegs > 1 ? [{ separator: true as const }] : []),
+          ...Array.from({ length: numSegs }, (_, i) => ({
+            label: `${allHidden[i] ? 'Show' : 'Hide'} Segment ${i + 1}`,
+            icon: allHidden[i] ? '○' : '●',
+            action: () => {
+              pushHistory();
+              const next = [...allHidden];
+              next[i] = !next[i];
+              canvas.updateFence(selectedId, { finishLabelHiddenSegs: next });
+            },
+          })),
+        ];
+        items.push({
+          label: 'Finish Side Label',
+          icon: '👁',
+          submenu: hideSubmenu,
+        });
+      }
+
       // Height submenu
       const heightOptions = HEIGHT_OPTIONS_MAP[fence.fenceType];
       if (heightOptions) {
@@ -388,31 +419,35 @@ export function CanvasArea() {
         });
       }
 
+      const getFinishSide = (i: number) => fence.finishSides?.[i] ?? fence.finishSide;
+      const flipSegSubmenu = [
+        {
+          label: 'All Segments',
+          icon: '↔',
+          action: () => {
+            pushHistory();
+            canvas.updateFence(selectedId, { finishSide: fence.finishSide === 'left' ? 'right' : 'left', finishSides: undefined });
+          },
+        },
+        ...(numSegs > 1 ? [{ separator: true as const }] : []),
+        ...Array.from({ length: numSegs }, (_, i) => ({
+          label: `Segment ${i + 1}`,
+          icon: '↕',
+          action: () => {
+            pushHistory();
+            const next = Array.from({ length: numSegs }, (_, j) => getFinishSide(j)) as ('left' | 'right')[];
+            next[i] = getFinishSide(i) === 'left' ? 'right' : 'left';
+            canvas.updateFence(selectedId, { finishSides: next });
+          },
+        })),
+      ];
+
       items.push({ separator: true });
       items.push({
         label: 'Flip Finish Side',
         icon: '↔',
-        action: () => {
-          pushHistory();
-          canvas.updateFence(selectedId, { finishSide: fence.finishSide === 'left' ? 'right' : 'left', finishSides: undefined });
-        },
+        submenu: flipSegSubmenu,
       });
-
-      if (seg !== null) {
-        const currentSide = fence.finishSides?.[segIdx] ?? fence.finishSide;
-        items.push({
-          label: `Flip Seg ${segIdx + 1} Finish Side`,
-          icon: '↕',
-          action: () => {
-            pushHistory();
-            const numSegs = fence.points.length / 2 - 1;
-            const getFinishSide = (i: number) => fence.finishSides?.[i] ?? fence.finishSide;
-            const next = Array.from({ length: numSegs }, (_, i) => getFinishSide(i)) as ('left' | 'right')[];
-            next[segIdx] = currentSide === 'left' ? 'right' : 'left';
-            canvas.updateFence(selectedId, { finishSides: next });
-          },
-        });
-      }
     }
 
     return items;

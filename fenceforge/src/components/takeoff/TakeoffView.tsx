@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+﻿import { useRef, useState } from 'react';
 import { startDrag } from '../../hooks/useDragResize';
 import { Upload, Ruler, MousePointer2, PenLine, Trash2, ChevronLeft, ChevronRight, Plus, X, GripVertical } from 'lucide-react';
 import { useTakeoffStore } from '../../store/takeoffStore';
@@ -38,7 +38,7 @@ function lineTotalFt(line: TakeoffLine, pixelsPerFt: number | null): number {
 // ── Self-contained column header — jump-free resize ──────────────────────────
 function ColHeader({
   label, width, onResize,
-  className = 'text-gray-400 bg-gray-900',
+  className = 'text-[var(--c-text3)] bg-[var(--c-bg1)]',
   children,
 }: {
   label: string;
@@ -79,13 +79,13 @@ function ColHeader({
   return (
     <th
       ref={thRef}
-      className={`relative text-left text-[10px] font-semibold uppercase tracking-wider px-2 py-1.5 border-r border-gray-700 select-none whitespace-nowrap ${className}`}
+      className={`relative text-left text-[10px] font-semibold uppercase tracking-wider px-2 py-1.5 border-r border-[var(--c-border1)] select-none whitespace-nowrap ${className}`}
       style={{ width }}
     >
       {children ?? label}
       <span
         onMouseDown={onHandleMouseDown}
-        className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-amber-400/60 transition-colors z-10"
+        className="absolute right-0 top-0 bottom-0 w-2 cursor-col-resize hover:bg-[var(--c-a-handle)] transition-colors z-10"
       />
     </th>
   );
@@ -218,69 +218,69 @@ export function TakeoffView() {
   const cw = colWidths;
 
   return (
-    <div className="flex flex-row flex-1 min-h-0 bg-gray-900 text-white overflow-hidden">
+    <div className="flex flex-row flex-1 min-h-0 bg-[var(--c-bg1)] text-[var(--c-text1)] overflow-hidden">
 
       {/* ── Left toolbar ─────────────────────────────────────────────────────── */}
       {tbCollapsed ? (
-        <div className="flex flex-col items-center bg-gray-800 border-r border-gray-700 shrink-0 py-2 gap-2" style={{ width: 28 }}>
-          <button onClick={() => setTbCollapsed(false)} className="text-gray-400 hover:text-amber-400 transition-colors" title="Expand toolbar">▸</button>
+        <div className="flex flex-col items-center bg-[var(--c-bg2)] border-r border-[var(--c-border1)] shrink-0 py-2 gap-2" style={{ width: 28 }}>
+          <button onClick={() => setTbCollapsed(false)} className="text-[var(--c-text3)] hover:text-[var(--c-accent)] transition-colors" title="Expand toolbar">▸</button>
         </div>
       ) : (
-        <div ref={tbRef} style={{ width: tbWidth }} className="bg-gray-800 border-r border-gray-700 flex flex-col shrink-0 overflow-y-auto relative text-white">
+        <div ref={tbRef} style={{ width: tbWidth }} className="bg-[var(--c-bg2)] border-r border-[var(--c-border1)] flex flex-col shrink-0 overflow-y-auto relative text-[var(--c-text1)]">
           {/* Collapse button */}
-          <div className="flex items-center justify-between px-2 py-1.5 border-b border-gray-700 shrink-0">
-            <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Tools</span>
-            <button onClick={() => setTbCollapsed(true)} className="text-gray-500 hover:text-amber-400 transition-colors text-xs" title="Collapse">◂</button>
+          <div className="flex items-center justify-between px-2 py-1.5 border-b border-[var(--c-border1)] shrink-0">
+            <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--c-text3)]">Tools</span>
+            <button onClick={() => setTbCollapsed(true)} className="text-[var(--c-text3)] hover:text-[var(--c-accent)] transition-colors text-xs" title="Collapse">◂</button>
           </div>
 
           <div className="flex flex-col gap-3 p-2 flex-1">
             {/* Upload + file */}
             <div className="flex flex-col gap-1">
               <button onClick={() => fileInputRef.current?.click()}
-                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded bg-amber-600 hover:bg-amber-500 text-white text-xs font-semibold transition-colors w-full">
+                className="flex items-center justify-center gap-1.5 px-2 py-2 rounded bg-emerald-600 hover:bg-[var(--c-accent)] text-[var(--c-text1)] text-xs font-semibold transition-colors w-full">
                 <Upload size={13} /> Upload PDF
               </button>
               <input ref={fileInputRef} type="file" accept=".pdf" className="hidden" onChange={handleFileChange} />
-              {pdfFileName && <span className="text-[10px] text-gray-400 truncate px-1" title={pdfFileName}>{pdfFileName}</span>}
-              {loading && <span className="text-[10px] text-gray-400 animate-pulse px-1">Loading…</span>}
+              {pdfFileName && <span className="text-[10px] text-[var(--c-text3)] truncate px-1" title={pdfFileName}>{pdfFileName}</span>}
+              {loading && <span className="text-[10px] text-[var(--c-text3)] animate-pulse px-1">Loading…</span>}
             </div>
 
             {/* Page nav */}
             {pdfTotalPages > 1 && (
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold px-1">Page</span>
+                <span className="text-[10px] uppercase tracking-wide text-[var(--c-text3)] font-semibold px-1">Page</span>
                 <div className="flex items-center gap-1 px-1">
                   <button onClick={() => handlePageChange(pdfPage - 1)} disabled={pdfPage <= 1}
-                    className="p-1 rounded hover:bg-gray-700 disabled:opacity-30"><ChevronLeft size={13} /></button>
-                  <span className="text-xs text-gray-300 flex-1 text-center">{pdfPage} / {pdfTotalPages}</span>
+                    className="p-1 rounded hover:bg-[var(--c-bg3)] disabled:opacity-30"><ChevronLeft size={13} /></button>
+                  <span className="text-xs text-[var(--c-text2)] flex-1 text-center">{pdfPage} / {pdfTotalPages}</span>
                   <button onClick={() => handlePageChange(pdfPage + 1)} disabled={pdfPage >= pdfTotalPages}
-                    className="p-1 rounded hover:bg-gray-700 disabled:opacity-30"><ChevronRight size={13} /></button>
+                    className="p-1 rounded hover:bg-[var(--c-bg3)] disabled:opacity-30"><ChevronRight size={13} /></button>
                 </div>
               </div>
             )}
 
-            <div className="h-px bg-gray-700" />
+            <div className="h-px bg-[var(--c-bg3)]" />
 
             {/* Tools */}
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold px-1">Tool</span>
+              <span className="text-[10px] uppercase tracking-wide text-[var(--c-text3)] font-semibold px-1">Tool</span>
               <button onClick={() => setActiveTool('select')}
-                className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${activeTool === 'select' ? 'bg-amber-500 text-gray-900 font-semibold' : 'hover:bg-gray-700 text-gray-300'}`}>
+                className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${activeTool === 'select' ? 'bg-[var(--c-accent)] text-gray-900 font-semibold' : 'hover:bg-[var(--c-bg3)] text-[var(--c-text2)]'}`}>
                 <MousePointer2 size={13} /> Select / Pan
               </button>
               <button onClick={() => setActiveTool('draw')}
-                className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${activeTool === 'draw' ? 'bg-amber-500 text-gray-900 font-semibold' : 'hover:bg-gray-700 text-gray-300'}`}>
+                className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs transition-colors ${activeTool === 'draw' ? 'bg-[var(--c-accent)] text-gray-900 font-semibold' : 'hover:bg-[var(--c-bg3)] text-[var(--c-text2)]'}`}>
                 <PenLine size={13} /> Draw Line
               </button>
             </div>
 
-            <div className="h-px bg-gray-700" />
+            <div className="h-px bg-[var(--c-bg3)]" />
 
             {/* Scale */}
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold px-1">Scale</span>
+              <span className="text-[10px] uppercase tracking-wide text-[var(--c-text3)] font-semibold px-1">Scale</span>
               <select value="" onChange={e => { if (e.target.value) setScalePreset(parseFloat(e.target.value)); }}
-                className="bg-gray-700 text-xs text-gray-200 rounded px-1.5 py-1 border border-gray-600 focus:border-cyan-400 outline-none w-full">
+                className="bg-[var(--c-bg3)] text-xs text-[var(--c-text2)] rounded px-1.5 py-1 border border-[var(--c-border2)] focus:border-cyan-400 outline-none w-full">
                 <option value="" disabled>{pixelsPerFt ? '✓ Scale Set' : 'Select Scale…'}</option>
                 <optgroup label="Engineering">{SCALE_PRESETS.filter(p => p.label.includes('"=')).map(p => <option key={p.label} value={p.pixelsPerFt}>{p.label}</option>)}</optgroup>
                 <optgroup label="Architectural">{SCALE_PRESETS.filter(p => !p.label.includes('"=')).map(p => <option key={p.label} value={p.pixelsPerFt}>{p.label}</option>)}</optgroup>
@@ -293,16 +293,16 @@ export function TakeoffView() {
               ) : (
                 <div className="flex flex-col gap-1 px-1">
                   <span className="text-xs text-cyan-400 animate-pulse">Click 2 points…</span>
-                  <button onClick={cancelCalibration} className="text-xs text-gray-500 hover:text-red-400 text-left">Cancel</button>
+                  <button onClick={cancelCalibration} className="text-xs text-[var(--c-text3)] hover:text-red-400 text-left">Cancel</button>
                 </div>
               )}
             </div>
 
-            <div className="h-px bg-gray-700" />
+            <div className="h-px bg-[var(--c-bg3)]" />
 
             {/* Colors */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold px-1">Color</span>
+              <span className="text-[10px] uppercase tracking-wide text-[var(--c-text3)] font-semibold px-1">Color</span>
               <div className="flex flex-wrap gap-1.5 px-1">
                 {LINE_COLORS.map(c => (
                   <button key={c} onClick={() => setActiveColor(c)} className="w-5 h-5 rounded-full border-2 transition-all"
@@ -311,35 +311,35 @@ export function TakeoffView() {
               </div>
             </div>
 
-            <div className="h-px bg-gray-700" />
+            <div className="h-px bg-[var(--c-bg3)]" />
 
             {/* Stroke width */}
             <div className="flex flex-col gap-1.5">
-              <span className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold px-1">Thickness</span>
+              <span className="text-[10px] uppercase tracking-wide text-[var(--c-text3)] font-semibold px-1">Thickness</span>
               <div className="flex flex-wrap gap-1 px-1">
                 {[1, 2, 3, 5, 8].map(w => (
                   <button key={w} onClick={() => setActiveStrokeWidth(w)} title={`${w}px`}
-                    className={`flex items-center justify-center w-7 h-7 rounded transition-colors ${activeStrokeWidth === w ? 'bg-amber-500/30 border border-amber-500' : 'hover:bg-gray-700 border border-transparent'}`}>
+                    className={`flex items-center justify-center w-7 h-7 rounded transition-colors ${activeStrokeWidth === w ? 'bg-[var(--c-accent)]/30 border border-emerald-500' : 'hover:bg-[var(--c-bg3)] border border-transparent'}`}>
                     <div className="rounded-full bg-white" style={{ width: Math.min(w * 3, 22), height: Math.max(w, 1) }} />
                   </button>
                 ))}
               </div>
             </div>
 
-            <div className="h-px bg-gray-700" />
+            <div className="h-px bg-[var(--c-bg3)]" />
 
             {/* Label */}
             <div className="flex flex-col gap-1">
-              <span className="text-[10px] uppercase tracking-wide text-gray-500 font-semibold px-1">Line Label</span>
+              <span className="text-[10px] uppercase tracking-wide text-[var(--c-text3)] font-semibold px-1">Line Label</span>
               <input type="text" value={activeLabel} onChange={e => setActiveLabel(e.target.value)}
                 placeholder="Label…"
-                className="bg-gray-700 text-xs text-white rounded px-2 py-1 border border-gray-600 focus:border-amber-500 outline-none w-full" />
+                className="bg-[var(--c-bg3)] text-xs text-[var(--c-text1)] rounded px-2 py-1 border border-[var(--c-border2)] focus:border-emerald-500 outline-none w-full" />
             </div>
 
             {pixelsPerFt && (
-              <div className="px-1 py-1 bg-gray-900/60 rounded text-center">
-                <span className="text-[10px] text-gray-500 block uppercase tracking-wide">Total</span>
-                <span className="text-sm font-mono font-bold text-amber-400">{totalFt.toFixed(1)} ft</span>
+              <div className="px-1 py-1 bg-[var(--c-bg1)]/60 rounded text-center">
+                <span className="text-[10px] text-[var(--c-text3)] block uppercase tracking-wide">Total</span>
+                <span className="text-sm font-mono font-bold text-[var(--c-accent)]">{totalFt.toFixed(1)} ft</span>
               </div>
             )}
 
@@ -354,7 +354,7 @@ export function TakeoffView() {
 
           {/* Drag handle — right edge */}
           <div onMouseDown={onTbDragStart}
-            className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-amber-400/60 transition-colors z-10" />
+            className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--c-a-handle)] transition-colors z-10" />
         </div>
       )}
 
@@ -362,38 +362,38 @@ export function TakeoffView() {
       <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
 
       {/* ── Canvas ───────────────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-gray-950">
+      <div className="flex-1 overflow-hidden min-h-0 flex flex-col bg-[var(--c-bg0)]">
         <TakeoffCanvas />
       </div>
 
       {/* ── Bottom panel ─────────────────────────────────────────────────────── */}
-      <div ref={panelDivRef} className="shrink-0 bg-gray-800 border-t border-gray-600 flex flex-col relative"
+      <div ref={panelDivRef} className="shrink-0 bg-[var(--c-bg2)] border-t border-[var(--c-border2)] flex flex-col relative"
         style={{ height: panelOpen ? panelH : 32 }}>
 
         {/* Resize grip strip — sits right on the top border */}
         {panelOpen && (
           <div
             onMouseDown={onPanelDragStart}
-            className="absolute top-0 left-0 right-0 h-1 cursor-row-resize hover:bg-amber-400/50 transition-colors z-20"
+            className="absolute top-0 left-0 right-0 h-1 cursor-row-resize hover:bg-emerald-400/50 transition-colors z-20"
           />
         )}
 
         {/* Header bar */}
-        <div className="flex items-center gap-2 px-3 border-b border-gray-700 shrink-0 bg-gray-900" style={{ height: 32 }}>
+        <div className="flex items-center gap-2 px-3 border-b border-[var(--c-border1)] shrink-0 bg-[var(--c-bg1)]" style={{ height: 32 }}>
           <button onClick={() => setPanelOpen(o => !o)}
-            className="text-gray-400 hover:text-amber-400 transition-colors text-xs font-bold w-4"
+            className="text-[var(--c-text3)] hover:text-[var(--c-accent)] transition-colors text-xs font-bold w-4"
             title={panelOpen ? 'Collapse' : 'Expand'}>
             {panelOpen ? '▾' : '▴'}
           </button>
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-gray-400">Markups List</span>
-          <span className="text-[10px] text-gray-600">({lines.length})</span>
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-[var(--c-text3)]">Markups List</span>
+          <span className="text-[10px] text-[var(--c-text4)]">({lines.length})</span>
 
           {panelOpen && (
             <>
               <div className="flex-1" />
               {!addingCol ? (
                 <button onClick={() => setAddingCol(true)}
-                  className="flex items-center gap-1 text-[10px] text-gray-400 hover:text-amber-400 transition-colors px-1.5 py-0.5 rounded border border-gray-700 hover:border-amber-500">
+                  className="flex items-center gap-1 text-[10px] text-[var(--c-text3)] hover:text-[var(--c-accent)] transition-colors px-1.5 py-0.5 rounded border border-[var(--c-border1)] hover:border-emerald-500">
                   <Plus size={10} /> Add Column
                 </button>
               ) : (
@@ -401,18 +401,18 @@ export function TakeoffView() {
                   <input autoFocus type="text" value={newColLabel} onChange={e => setNewColLabel(e.target.value)}
                     onKeyDown={e => { if (e.key === 'Enter') addCustomCol(); if (e.key === 'Escape') setAddingCol(false); }}
                     placeholder="Column name"
-                    className="bg-gray-700 text-[10px] text-white rounded px-2 py-0.5 border border-gray-600 focus:border-amber-500 outline-none w-28" />
+                    className="bg-[var(--c-bg3)] text-[10px] text-[var(--c-text1)] rounded px-2 py-0.5 border border-[var(--c-border2)] focus:border-emerald-500 outline-none w-28" />
                   <select value={newColType} onChange={e => setNewColType(e.target.value as 'text' | 'number')}
-                    className="bg-gray-700 text-[10px] text-gray-200 rounded px-1 py-0.5 border border-gray-600 outline-none">
+                    className="bg-[var(--c-bg3)] text-[10px] text-[var(--c-text2)] rounded px-1 py-0.5 border border-[var(--c-border2)] outline-none">
                     <option value="text">Text</option>
                     <option value="number">Number</option>
                   </select>
-                  <button onClick={addCustomCol} className="text-[10px] text-amber-400 hover:text-amber-300 font-semibold">Add</button>
-                  <button onClick={() => setAddingCol(false)} className="text-[10px] text-gray-500 hover:text-red-400"><X size={10} /></button>
+                  <button onClick={addCustomCol} className="text-[10px] text-[var(--c-accent)] hover:text-[var(--c-accent2)] font-semibold">Add</button>
+                  <button onClick={() => setAddingCol(false)} className="text-[10px] text-[var(--c-text3)] hover:text-red-400"><X size={10} /></button>
                 </div>
               )}
               {pixelsPerFt && lines.length > 0 && (
-                <span className="text-[10px] font-mono text-amber-400 ml-3">Total: {totalFt.toFixed(2)} ft</span>
+                <span className="text-[10px] font-mono text-[var(--c-accent)] ml-3">Total: {totalFt.toFixed(2)} ft</span>
               )}
             </>
           )}
@@ -435,7 +435,7 @@ export function TakeoffView() {
                       key={col.id}
                       label={col.label}
                       width={col.width}
-                      className="text-amber-400/80 bg-gray-900"
+                      className="text-[var(--c-accent)]/80 bg-[var(--c-bg1)]"
                       onResize={(w) => {
                         const next = customColsRef.current.map(c => c.id === col.id ? {...c, width: w} : c);
                         customColsRef.current = next;
@@ -443,22 +443,22 @@ export function TakeoffView() {
                       }}
                     >
                       <span className="flex items-center gap-1 pr-3">
-                        <GripVertical size={8} className="text-gray-600 shrink-0" />
+                        <GripVertical size={8} className="text-[var(--c-text4)] shrink-0" />
                         <span className="truncate">{col.label}</span>
-                        <button onClick={() => removeCustomCol(col.id)} className="ml-auto text-gray-600 hover:text-red-400 transition-colors shrink-0" title="Remove column">
+                        <button onClick={() => removeCustomCol(col.id)} className="ml-auto text-[var(--c-text4)] hover:text-red-400 transition-colors shrink-0" title="Remove column">
                           <X size={8} />
                         </button>
                       </span>
                     </ColHeader>
                   ))}
                   {/* Filler — no explicit width so it gets all remaining space */}
-                  <th className="bg-gray-900 border-0" />
+                  <th className="bg-[var(--c-bg1)] border-0" />
                 </tr>
               </thead>
 
               <tbody>
                 {lines.length === 0 && (
-                  <tr><td colSpan={6 + customCols.length} className="text-center text-[10px] text-gray-600 py-8">
+                  <tr><td colSpan={6 + customCols.length} className="text-center text-[10px] text-[var(--c-text4)] py-8">
                     No measurements yet — draw lines on the canvas above.
                   </td></tr>
                 )}
@@ -468,54 +468,54 @@ export function TakeoffView() {
                   return (
                     <tr key={line.id}
                       onClick={() => useTakeoffStore.getState().selectLine(isSelected ? null : line.id)}
-                      className={`border-b border-gray-700/40 cursor-pointer transition-colors ${isSelected ? 'bg-gray-700' : 'hover:bg-gray-700/40'}`}>
+                      className={`border-b border-[var(--c-border1)]/40 cursor-pointer transition-colors ${isSelected ? 'bg-[var(--c-bg3)]' : 'hover:bg-[var(--c-bg3)]/40'}`}>
 
                       {/* Color swatch */}
-                      <td className="px-2 py-1.5 border-r border-gray-700/50" style={{ width: cw.color }}>
+                      <td className="px-2 py-1.5 border-r border-[var(--c-border1)]/50" style={{ width: cw.color }}>
                         <span className="w-4 h-4 rounded-full inline-block border border-black/30" style={{ background: line.color }} />
                       </td>
 
                       {/* Subject — inline rename */}
-                      <td className="px-1 py-0.5 border-r border-gray-700/50" style={{ width: cw.subject, maxWidth: cw.subject, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
+                      <td className="px-1 py-0.5 border-r border-[var(--c-border1)]/50" style={{ width: cw.subject, maxWidth: cw.subject, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
                         <input
                           value={line.label}
                           onChange={e => renameLine(line.id, e.target.value)}
                           onClick={e => e.stopPropagation()}
                           placeholder={`Line ${i + 1}`}
-                          className="w-full bg-transparent text-[11px] text-gray-200 outline-none focus:bg-gray-700/60 rounded px-1 py-0.5 placeholder-gray-500 truncate"
+                          className="w-full bg-transparent text-[11px] text-[var(--c-text2)] outline-none focus:bg-[var(--c-bg3)]/60 rounded px-1 py-0.5 placeholder-gray-500 truncate"
                         />
                       </td>
 
                       {/* Page Label */}
-                      <td className="px-2 py-1.5 border-r border-gray-700/50 text-gray-400" style={{ width: cw.pageLabel, maxWidth: cw.pageLabel, overflow: 'hidden' }}>
+                      <td className="px-2 py-1.5 border-r border-[var(--c-border1)]/50 text-[var(--c-text3)]" style={{ width: cw.pageLabel, maxWidth: cw.pageLabel, overflow: 'hidden' }}>
                         <span className="block truncate text-[10px]">{pdfFileName ? pdfFileName.replace(/\.pdf$/i, '') : '—'}</span>
                       </td>
 
                       {/* Page Index */}
-                      <td className="px-2 py-1.5 border-r border-gray-700/50 text-gray-400 text-center" style={{ width: cw.pageIndex }}>
+                      <td className="px-2 py-1.5 border-r border-[var(--c-border1)]/50 text-[var(--c-text3)] text-center" style={{ width: cw.pageIndex }}>
                         <span className="text-[10px]">{line.page || '—'}</span>
                       </td>
 
                       {/* Length */}
-                      <td className="px-2 py-1.5 border-r border-gray-700/50 font-mono text-white text-right" style={{ width: cw.length }}>
-                        {pixelsPerFt ? `${ft.toFixed(2)} ft` : <span className="text-gray-600 text-[10px]">Set scale</span>}
+                      <td className="px-2 py-1.5 border-r border-[var(--c-border1)]/50 font-mono text-[var(--c-text1)] text-right" style={{ width: cw.length }}>
+                        {pixelsPerFt ? `${ft.toFixed(2)} ft` : <span className="text-[var(--c-text4)] text-[10px]">Set scale</span>}
                       </td>
 
                       {/* Segments */}
-                      <td className="px-2 py-1.5 border-r border-gray-700/50 text-gray-400 text-center" style={{ width: cw.segments }}>
+                      <td className="px-2 py-1.5 border-r border-[var(--c-border1)]/50 text-[var(--c-text3)] text-center" style={{ width: cw.segments }}>
                         <span className="text-[10px]">{line.segments.length}</span>
                       </td>
 
                       {/* Custom columns */}
                       {customCols.map(col => (
-                        <td key={col.id} className="px-1 py-0.5 border-r border-gray-700/50" style={{ width: col.width }}>
+                        <td key={col.id} className="px-1 py-0.5 border-r border-[var(--c-border1)]/50" style={{ width: col.width }}>
                           <input
                             type={col.type === 'number' ? 'number' : 'text'}
                             value={customData[line.id]?.[col.id] ?? ''}
                             onChange={e => setCell(line.id, col.id, e.target.value)}
                             onClick={e => e.stopPropagation()}
                             placeholder="—"
-                            className="w-full bg-transparent text-[11px] text-gray-200 outline-none focus:bg-gray-700/60 rounded px-1 py-0.5 placeholder-gray-700"
+                            className="w-full bg-transparent text-[11px] text-[var(--c-text2)] outline-none focus:bg-[var(--c-bg3)]/60 rounded px-1 py-0.5 placeholder-gray-700"
                           />
                         </td>
                       ))}
@@ -526,14 +526,14 @@ export function TakeoffView() {
 
               {lines.length > 0 && (
                 <tfoot>
-                  <tr className="bg-gray-900 border-t border-gray-600 sticky bottom-0">
-                    <td colSpan={4} className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-500 border-r border-gray-700">
+                  <tr className="bg-[var(--c-bg1)] border-t border-[var(--c-border2)] sticky bottom-0">
+                    <td colSpan={4} className="px-2 py-1.5 text-[10px] font-semibold uppercase tracking-wider text-[var(--c-text3)] border-r border-[var(--c-border1)]">
                       Total — {lines.length} line{lines.length !== 1 ? 's' : ''}
                     </td>
-                    <td className="px-2 py-1.5 font-mono font-bold text-amber-400 text-right border-r border-gray-700" style={{ width: cw.length }}>
+                    <td className="px-2 py-1.5 font-mono font-bold text-[var(--c-accent)] text-right border-r border-[var(--c-border1)]" style={{ width: cw.length }}>
                       {pixelsPerFt ? `${totalFt.toFixed(2)} ft` : '—'}
                     </td>
-                    <td colSpan={1 + customCols.length} className="border-r border-gray-700" />
+                    <td colSpan={1 + customCols.length} className="border-r border-[var(--c-border1)]" />
                   </tr>
                 </tfoot>
               )}
@@ -544,8 +544,8 @@ export function TakeoffView() {
               const line = lines.find(l => l.id === selectedLineId);
               if (!line) return null;
               return (
-                <div className="sticky bottom-0 border-t border-gray-700 bg-gray-800 px-4 py-2 flex items-center gap-4 flex-wrap">
-                  <span className="text-[10px] text-gray-300 font-semibold"
+                <div className="sticky bottom-0 border-t border-[var(--c-border1)] bg-[var(--c-bg2)] px-4 py-2 flex items-center gap-4 flex-wrap">
+                  <span className="text-[10px] text-[var(--c-text2)] font-semibold"
                     style={{ borderLeft: `3px solid ${line.color}`, paddingLeft: 6 }}>
                     {line.label || 'Selected Line'}
                   </span>
@@ -554,18 +554,18 @@ export function TakeoffView() {
                       onClick={() => toggleSegmentCurved(line.id, selectedSegIdx)}
                       className={`flex items-center gap-1.5 px-2 py-1 rounded text-xs font-semibold transition-colors border ${
                         line.segments[selectedSegIdx].curved
-                          ? 'bg-amber-500/20 border-amber-500/60 text-amber-400'
-                          : 'bg-gray-600/50 border-gray-600 text-gray-400 hover:text-gray-200'}`}>
+                          ? 'bg-[var(--c-a-glow)] border-emerald-500/60 text-[var(--c-accent)]'
+                          : 'bg-[var(--c-bg4)]/50 border-[var(--c-border2)] text-[var(--c-text3)] hover:text-[var(--c-text2)]'}`}>
                       〜 Seg {selectedSegIdx + 1} — {line.segments[selectedSegIdx].curved ? 'Curved' : 'Straight'}
                     </button>
                   )}
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-gray-400">Thickness</span>
+                    <span className="text-[10px] text-[var(--c-text3)]">Thickness</span>
                     <input type="range" min={1} max={12} step={1}
                       value={line.strokeWidth ?? 2}
                       onChange={e => setLineStrokeWidth(line.id, parseInt(e.target.value))}
-                      className="w-20 h-1 accent-amber-400" />
-                    <span className="text-[10px] text-gray-300 font-mono w-6">{line.strokeWidth ?? 2}px</span>
+                      className="w-20 h-1 accent-[var(--c-accent)]" />
+                    <span className="text-[10px] text-[var(--c-text2)] font-mono w-6">{line.strokeWidth ?? 2}px</span>
                   </div>
                   <button onClick={() => deleteLine(line.id)}
                     className="ml-auto flex items-center gap-1 text-[10px] text-red-400 hover:text-red-300 px-2 py-1 rounded border border-red-900/40 hover:border-red-500/40 transition-colors">

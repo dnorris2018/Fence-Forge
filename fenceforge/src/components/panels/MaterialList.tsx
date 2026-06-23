@@ -1,4 +1,4 @@
-import { useState } from 'react';
+﻿import { useState } from 'react';
 import { useCanvasStore } from '../../store/canvasStore';
 import { computeMaterials } from '../../utils/materials';
 import { FENCE_TYPES } from '../../constants/fenceTypes';
@@ -32,12 +32,12 @@ function fenceDisplayName(type: FenceTypeKey, heightFt?: number, fenceStyle?: st
 interface RowProps { label: string; value: string | number; sub?: string; highlight?: boolean }
 function Row({ label, value, sub, highlight }: RowProps) {
   return (
-    <div className="flex items-center justify-between py-1 border-b border-gray-700/40 pl-2">
+    <div className="flex items-center justify-between py-1 border-b border-[var(--c-border1)]/40 pl-2">
       <div>
-        <span className={`text-xs ${highlight ? 'text-amber-300 font-semibold' : 'text-gray-300'}`}>{label}</span>
-        {sub && <p className="text-[10px] text-gray-600 leading-none mt-0.5">{sub}</p>}
+        <span className={`text-xs ${highlight ? 'text-[var(--c-accent2)] font-semibold' : 'text-[var(--c-text2)]'}`}>{label}</span>
+        {sub && <p className="text-[10px] text-[var(--c-text4)] leading-none mt-0.5">{sub}</p>}
       </div>
-      <span className={`text-xs font-mono font-semibold ml-2 shrink-0 ${highlight ? 'text-amber-300' : 'text-white'}`}>
+      <span className={`text-xs font-mono font-semibold ml-2 shrink-0 ${highlight ? 'text-[var(--c-accent2)]' : 'text-[var(--c-text1)]'}`}>
         {value}
       </span>
     </div>
@@ -46,7 +46,7 @@ function Row({ label, value, sub, highlight }: RowProps) {
 
 function Divider({ title }: { title: string }) {
   return (
-    <p className="text-[10px] text-gray-500 uppercase tracking-widest font-semibold mt-4 mb-1">
+    <p className="text-[10px] text-[var(--c-text3)] uppercase tracking-widest font-semibold mt-4 mb-1">
       {title}
     </p>
   );
@@ -62,7 +62,7 @@ export function MaterialList() {
   if (Object.keys(fences).length === 0) {
     return (
       <div className="p-4">
-        <p className="text-xs text-gray-500">Draw fences to see the material list.</p>
+        <p className="text-xs text-[var(--c-text3)]">Draw fences to see the material list.</p>
       </div>
     );
   }
@@ -76,7 +76,7 @@ export function MaterialList() {
   }
 
   return (
-    <div className="p-3 text-white">
+    <div className="p-3 text-[var(--c-text1)]">
 
       {typeEntries.map(([type, acc]) => {
         const def = FENCE_TYPES[type];
@@ -107,17 +107,17 @@ export function MaterialList() {
                 className="w-3.5 h-3.5 rounded shrink-0 border border-black/30 shadow-sm"
                 style={{ background: acc.color }}
               />
-              <span className="text-[11px] text-white font-bold tracking-wide flex-1">
+              <span className="text-[11px] text-[var(--c-text1)] font-bold tracking-wide flex-1">
                 {sectionTitle}
               </span>
-              <span className="text-[10px] text-gray-300 font-mono mr-1">
+              <span className="text-[10px] text-[var(--c-text2)] font-mono mr-1">
                 {acc.linearFt.toFixed(1)} ft
               </span>
-              <span className="text-gray-400 text-xs">{open ? '▾' : '▸'}</span>
+              <span className="text-[var(--c-text3)] text-xs">{open ? '▾' : '▸'}</span>
             </button>
 
             {open && (
-              <div className="border-l border-gray-700 ml-1.5 pl-1">
+              <div className="border-l border-[var(--c-border1)] ml-1.5 pl-1">
                 {/* Linear footage — height + type + style */}
                 <Row
                   label={fenceDisplayName(type, singleHeight, singleStyle)}
@@ -171,7 +171,6 @@ export function MaterialList() {
       <Row label="Line Posts"            value={m.totalLinePosts} />
       <Row label="Gate Posts"            value={m.gatePosts} />
       <Row label="Total Posts"           value={m.totalPosts} highlight />
-      <Row label="Concrete Bags (80 lb)" value={m.concreteBags} highlight />
     </div>
   );
 }

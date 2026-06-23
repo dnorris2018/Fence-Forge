@@ -1,4 +1,4 @@
-import { useCanvasStore } from '../../store/canvasStore';
+﻿import { useCanvasStore } from '../../store/canvasStore';
 import { useHistory } from '../../hooks/useHistory';
 
 interface Props { objectId: string; }
@@ -25,16 +25,16 @@ export function LabelTextProperties({ objectId }: Props) {
 
   return (
     <div className="p-3 space-y-4">
-      <p className="text-xs text-gray-400 uppercase tracking-wide">Text Label</p>
+      <p className="text-xs text-[var(--c-text3)] uppercase tracking-wide">Text Label</p>
 
       <div>
-        <p className="text-xs text-gray-400 mb-1">Text</p>
+        <p className="text-xs text-[var(--c-text3)] mb-1">Text</p>
         <textarea
           value={obj.label ?? ''}
           onChange={e => handleTextChange(e.target.value)}
           rows={4}
           placeholder="Type your text here…"
-          className="w-full px-2 py-1.5 rounded bg-gray-700 text-white text-sm border border-gray-600 focus:border-amber-400 outline-none resize-y"
+          className="w-full px-2 py-1.5 rounded bg-[var(--c-bg3)] text-[var(--c-text1)] text-sm border border-[var(--c-border2)] focus:border-emerald-400 outline-none resize-y"
         />
       </div>
 

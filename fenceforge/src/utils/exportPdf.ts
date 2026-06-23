@@ -92,7 +92,7 @@ export async function exportToPdf(
   doc.setTextColor(180, 180, 180);
   doc.setFontSize(9);
   doc.setFont('helvetica', 'normal');
-  doc.text('Material List', PW2 - 10, 8.5, { align: 'right' });
+  doc.text('Line Items', PW2 - 10, 8.5, { align: 'right' });
   doc.text(new Date().toLocaleDateString(), PW2 / 2, 8.5, { align: 'center' });
 
   const m = computeMaterials(fences, gates);
@@ -182,7 +182,6 @@ export async function exportToPdf(
     ['Line Posts', m.totalLinePosts],
     ['Gate Posts', m.gatePosts],
     ['Total Posts', m.totalPosts],
-    ['Concrete Bags (80 lb)', m.concreteBags],
   ];
 
   autoTable(doc, {

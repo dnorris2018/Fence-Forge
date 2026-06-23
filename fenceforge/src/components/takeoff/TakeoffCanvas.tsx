@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState, useCallback } from 'react';
+﻿import { useRef, useEffect, useState, useCallback } from 'react';
 import { Stage, Layer, Line, Circle, Text, Group, Rect, Shape, Image as KonvaImage } from 'react-konva';
 import type Konva from 'konva';
 import * as pdfjsLib from 'pdfjs-dist';
@@ -828,7 +828,7 @@ export function TakeoffCanvas() {
 
       {!pdfBuffer && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <p className="text-gray-500 text-sm">Upload a PDF drawing to begin</p>
+          <p className="text-[var(--c-text3)] text-sm">Upload a PDF drawing to begin</p>
         </div>
       )}
 

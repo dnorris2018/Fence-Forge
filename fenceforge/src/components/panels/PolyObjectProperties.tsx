@@ -1,4 +1,4 @@
-import { useCanvasStore } from '../../store/canvasStore';
+﻿import { useCanvasStore } from '../../store/canvasStore';
 import { useUiStore } from '../../store/uiStore';
 import { useHistory } from '../../hooks/useHistory';
 import type { SegmentCurveData } from '../../types';
@@ -69,10 +69,10 @@ export function PolyObjectProperties({ objectId }: Props) {
 
   return (
     <div className="p-4 flex flex-col gap-4">
-      <p className="text-xs text-gray-400 uppercase tracking-wide">{label}</p>
+      <p className="text-xs text-[var(--c-text3)] uppercase tracking-wide">{label}</p>
 
       <div className="flex flex-col gap-1">
-        <p className="text-xs text-gray-400">Edge Style</p>
+        <p className="text-xs text-[var(--c-text3)]">Edge Style</p>
         <div className="flex gap-2">
           {([true, false] as const).map(c => (
             <button
@@ -80,8 +80,8 @@ export function PolyObjectProperties({ objectId }: Props) {
               onClick={() => { if (curved !== c) toggleCurved(); }}
               className={`flex-1 py-1 rounded text-xs font-medium transition-colors ${
                 curved === c
-                  ? 'bg-orange-500 text-white'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-orange-500 text-[var(--c-text1)]'
+                  : 'bg-[var(--c-bg3)] text-[var(--c-text2)] hover:bg-[var(--c-bg4)]'
               }`}
             >
               {c ? 'All Curved' : 'All Straight'}
@@ -93,20 +93,20 @@ export function PolyObjectProperties({ objectId }: Props) {
       {/* Per-segment curve toggle */}
       {nv >= 2 && (
         <div className="flex flex-col gap-1">
-          <p className="text-xs text-gray-400">Segments — click a side on canvas to select</p>
+          <p className="text-xs text-[var(--c-text3)]">Segments — click a side on canvas to select</p>
           <div className="space-y-1">
             {Array.from({ length: numSegs }, (_, i) => {
               const isCurved = segCurveData[i]?.curved ?? false;
               const isActive = selectedPolySegment === i;
               return (
-                <div key={i} className={`flex items-center gap-1 rounded px-1 py-0.5 ${isActive ? 'bg-gray-700' : ''}`}>
-                  <span className="text-xs text-gray-400 w-14 shrink-0">Side {i + 1}</span>
+                <div key={i} className={`flex items-center gap-1 rounded px-1 py-0.5 ${isActive ? 'bg-[var(--c-bg3)]' : ''}`}>
+                  <span className="text-xs text-[var(--c-text3)] w-14 shrink-0">Side {i + 1}</span>
                   <button
                     onClick={() => toggleSegmentCurve(i)}
                     className={`flex-1 py-1 rounded text-xs font-medium transition-colors ${
                       isCurved
                         ? 'bg-blue-500/30 border border-blue-500/60 text-blue-300'
-                        : 'bg-gray-700 hover:bg-gray-600 text-gray-400'
+                        : 'bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] text-[var(--c-text3)]'
                     }`}
                   >
                     {isCurved ? '⌒ Curved' : '— Straight'}
@@ -120,7 +120,7 @@ export function PolyObjectProperties({ objectId }: Props) {
 
       <button
         onClick={handleDelete}
-        className="mt-auto py-1 px-3 rounded text-xs bg-red-800 hover:bg-red-700 text-white transition-colors"
+        className="mt-auto py-1 px-3 rounded text-xs bg-red-800 hover:bg-red-700 text-[var(--c-text1)] transition-colors"
       >
         Delete {label}
       </button>

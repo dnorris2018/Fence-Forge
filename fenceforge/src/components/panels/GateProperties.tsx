@@ -1,4 +1,4 @@
-import { useCanvasStore } from '../../store/canvasStore';
+﻿import { useCanvasStore } from '../../store/canvasStore';
 import { useHistory } from '../../hooks/useHistory';
 import type { GateType, HingeSide, SwingDirection } from '../../types/gate';
 
@@ -26,11 +26,11 @@ export function GateProperties({ gateId }: Props) {
 
   return (
     <div className="p-3 space-y-4">
-      <p className="text-xs text-gray-400 uppercase tracking-wide">Gate</p>
+      <p className="text-xs text-[var(--c-text3)] uppercase tracking-wide">Gate</p>
 
       {/* Gate type */}
       <div>
-        <p className="text-xs text-gray-400 mb-1">Type</p>
+        <p className="text-xs text-[var(--c-text3)] mb-1">Type</p>
         <div className="flex gap-1">
           {(['single-swing', 'double-swing'] as GateType[]).map(t => (
             <button
@@ -38,8 +38,8 @@ export function GateProperties({ gateId }: Props) {
               onClick={() => patch('gateType', t)}
               className={`flex-1 py-1 rounded text-xs transition-colors ${
                 gate.gateType === t
-                  ? 'bg-amber-500 text-gray-900 font-medium'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-[var(--c-accent)] text-gray-900 font-medium'
+                  : 'bg-[var(--c-bg3)] text-[var(--c-text2)] hover:bg-[var(--c-bg4)]'
               }`}
             >
               {t === 'single-swing' ? 'Single' : 'Double'}
@@ -50,7 +50,7 @@ export function GateProperties({ gateId }: Props) {
 
       {/* Width */}
       <div>
-        <p className="text-xs text-gray-400 mb-1">Width (ft)</p>
+        <p className="text-xs text-[var(--c-text3)] mb-1">Width (ft)</p>
         <div className="flex items-center gap-2">
           <input
             type="number"
@@ -59,15 +59,15 @@ export function GateProperties({ gateId }: Props) {
             step={0.5}
             value={gate.widthFt}
             onChange={e => patch('widthFt', Math.max(2, Math.min(20, parseFloat(e.target.value) || gate.widthFt)))}
-            className="w-20 px-2 py-1 rounded bg-gray-700 text-white text-sm border border-gray-600 focus:border-amber-400 outline-none"
+            className="w-20 px-2 py-1 rounded bg-[var(--c-bg3)] text-[var(--c-text1)] text-sm border border-[var(--c-border2)] focus:border-emerald-400 outline-none"
           />
-          <span className="text-xs text-gray-400">ft</span>
+          <span className="text-xs text-[var(--c-text3)]">ft</span>
         </div>
         <div className="flex gap-1 mt-1">
           {(gate.gateType === 'double-swing' ? [8, 10, 12] : [3, 4, 5]).map(w => (
             <button key={w} onClick={() => patch('widthFt', w)}
               className={`px-2 py-0.5 rounded text-xs transition-colors ${
-                gate.widthFt === w ? 'bg-amber-500/30 text-amber-300' : 'bg-gray-700 text-gray-400 hover:bg-gray-600'
+                gate.widthFt === w ? 'bg-[var(--c-accent)]/30 text-[var(--c-accent2)]' : 'bg-[var(--c-bg3)] text-[var(--c-text3)] hover:bg-[var(--c-bg4)]'
               }`}
             >{w}'</button>
           ))}
@@ -76,7 +76,7 @@ export function GateProperties({ gateId }: Props) {
 
       {/* Hinge side */}
       <div>
-        <p className="text-xs text-gray-400 mb-1">Hinge Side</p>
+        <p className="text-xs text-[var(--c-text3)] mb-1">Hinge Side</p>
         <div className="flex gap-1">
           {(['left', 'right'] as HingeSide[]).map(side => (
             <button
@@ -84,8 +84,8 @@ export function GateProperties({ gateId }: Props) {
               onClick={() => patch('hingeSide', side)}
               className={`flex-1 py-1 rounded text-xs capitalize transition-colors ${
                 gate.hingeSide === side
-                  ? 'bg-amber-500 text-gray-900 font-medium'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-[var(--c-accent)] text-gray-900 font-medium'
+                  : 'bg-[var(--c-bg3)] text-[var(--c-text2)] hover:bg-[var(--c-bg4)]'
               }`}
             >
               {side}
@@ -96,7 +96,7 @@ export function GateProperties({ gateId }: Props) {
 
       {/* Swing direction */}
       <div>
-        <p className="text-xs text-gray-400 mb-1">Opens</p>
+        <p className="text-xs text-[var(--c-text3)] mb-1">Opens</p>
         <div className="flex gap-1">
           {(['inward', 'outward'] as SwingDirection[]).map(dir => (
             <button
@@ -104,8 +104,8 @@ export function GateProperties({ gateId }: Props) {
               onClick={() => patch('swingDirection', dir)}
               className={`flex-1 py-1 rounded text-xs capitalize transition-colors ${
                 gate.swingDirection === dir
-                  ? 'bg-amber-500 text-gray-900 font-medium'
-                  : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                  ? 'bg-[var(--c-accent)] text-gray-900 font-medium'
+                  : 'bg-[var(--c-bg3)] text-[var(--c-text2)] hover:bg-[var(--c-bg4)]'
               }`}
             >
               {dir}
@@ -116,13 +116,13 @@ export function GateProperties({ gateId }: Props) {
 
       {/* Metal frame */}
       <div>
-        <p className="text-xs text-gray-400 mb-1">Frame</p>
+        <p className="text-xs text-[var(--c-text3)] mb-1">Frame</p>
         <button
           onClick={() => patch('metalFrame', !gate.metalFrame)}
           className={`w-full py-1 rounded text-xs transition-colors ${
             gate.metalFrame
-              ? 'bg-amber-500 text-gray-900 font-medium'
-              : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+              ? 'bg-[var(--c-accent)] text-gray-900 font-medium'
+              : 'bg-[var(--c-bg3)] text-[var(--c-text2)] hover:bg-[var(--c-bg4)]'
           }`}
         >
           {gate.metalFrame ? 'Metal Frame On' : 'Metal Frame Off'}

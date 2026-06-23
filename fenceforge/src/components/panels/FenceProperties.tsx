@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+﻿import { useRef } from 'react';
 import { useCanvasStore } from '../../store/canvasStore';
 import { useHistory } from '../../hooks/useHistory';
 import { useUiStore } from '../../store/uiStore';
@@ -80,19 +80,19 @@ export function FenceProperties({ fenceId }: Props) {
     <div className="p-3 space-y-4">
       {/* Fence type label */}
       <div>
-        <p className="text-xs text-gray-400 uppercase tracking-wide mb-1">Fence</p>
-        <div className="flex items-center gap-2 p-2 bg-gray-700 rounded">
+        <p className="text-xs text-[var(--c-text3)] uppercase tracking-wide mb-1">Fence</p>
+        <div className="flex items-center gap-2 p-2 bg-[var(--c-bg3)] rounded">
           <span
             className="w-4 h-4 rounded-sm border border-black/20 shrink-0"
             style={{ background: currentColor }}
           />
-          <span className="text-sm text-white truncate">{def.label}</span>
+          <span className="text-sm text-[var(--c-text1)] truncate">{def.label}</span>
         </div>
       </div>
 
       {/* Per-line color picker */}
       <div>
-        <p className="text-xs text-gray-400 mb-2">Fence Color</p>
+        <p className="text-xs text-[var(--c-text3)] mb-2">Fence Color</p>
         <div className="flex items-center gap-2">
           <input
             type="color"
@@ -102,10 +102,10 @@ export function FenceProperties({ fenceId }: Props) {
             className="w-10 h-8 rounded cursor-pointer border-0 bg-transparent p-0"
             title="Pick fence color"
           />
-          <span className="text-xs font-mono text-gray-300">{currentColor.toUpperCase()}</span>
+          <span className="text-xs font-mono text-[var(--c-text2)]">{currentColor.toUpperCase()}</span>
           <button
             onClick={() => { saveHistory(); updateFence(fenceId, { color: FENCE_TYPES[fence.fenceType].color }); }}
-            className="ml-auto text-xs text-gray-400 hover:text-gray-200 transition-colors"
+            className="ml-auto text-xs text-[var(--c-text3)] hover:text-[var(--c-text2)] transition-colors"
             title="Reset to default color"
           >
             Reset
@@ -114,8 +114,8 @@ export function FenceProperties({ fenceId }: Props) {
       </div>
 
       <div>
-        <p className="text-xs text-gray-400 mb-1">Length</p>
-        <p className="text-sm text-amber-300 font-mono">{lengthFt} ft</p>
+        <p className="text-xs text-[var(--c-text3)] mb-1">Length</p>
+        <p className="text-sm text-[var(--c-accent2)] font-mono">{lengthFt} ft</p>
       </div>
 
 
@@ -123,7 +123,7 @@ export function FenceProperties({ fenceId }: Props) {
       {/* Line post spacing (ornamental only) */}
       {(fence.fenceType === 'aluminum-ornamental' || fence.fenceType === 'steel-ornamental') && (
         <div>
-          <p className="text-xs text-gray-400 mb-2">Line Post Spacing</p>
+          <p className="text-xs text-[var(--c-text3)] mb-2">Line Post Spacing</p>
           <div className="flex gap-1">
             {[6, 8].map(sp => (
               <button
@@ -131,8 +131,8 @@ export function FenceProperties({ fenceId }: Props) {
                 onClick={() => { saveHistory(); updateFence(fenceId, { linePostSpacingFt: sp }); }}
                 className={`flex-1 py-1 rounded text-xs font-mono transition-colors ${
                   (fence.linePostSpacingFt ?? 6) === sp
-                    ? 'bg-amber-500/30 border border-amber-500/60 text-amber-300'
-                    : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                    ? 'bg-[var(--c-accent)]/30 border border-emerald-500/60 text-[var(--c-accent2)]'
+                    : 'bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] text-[var(--c-text2)]'
                 }`}
               >
                 {sp}'

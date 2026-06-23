@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+﻿import { useEffect, useRef, useState } from 'react';
 
 export interface MenuItem {
   label: string;
@@ -30,26 +30,26 @@ function SubMenu({ items, parentRect, onClose }: { items: MenuEntry[]; parentRec
   return (
     <div
       ref={ref}
-      className="fixed z-50 min-w-[200px] rounded shadow-2xl border border-gray-600 bg-[#2b2b2b] py-1 text-sm select-none"
+      className="fixed z-50 min-w-[200px] rounded shadow-2xl border border-[var(--c-border2)] bg-[var(--c-bg2)] py-1 text-sm select-none"
       style={{ left, top }}
       onContextMenu={e => e.preventDefault()}
     >
       {items.map((item, i) => {
-        if ('separator' in item) return <div key={i} className="my-1 border-t border-gray-600" />;
+        if ('separator' in item) return <div key={i} className="my-1 border-t border-[var(--c-border2)]" />;
         return (
           <button
             key={i}
             disabled={item.disabled}
             onClick={() => { if (!item.disabled && item.action) { item.action(); onClose(); } }}
             className={`w-full flex items-center justify-between px-3 py-1 text-left transition-colors ${
-              item.disabled ? 'text-gray-600 cursor-default' : 'text-gray-200 hover:bg-gray-600 cursor-pointer'
+              item.disabled ? 'text-[var(--c-text4)] cursor-default' : 'text-[var(--c-text2)] hover:bg-[var(--c-bg4)] cursor-pointer'
             }`}
           >
             <span className="flex items-center gap-2">
-              {item.icon && <span className="text-gray-400 w-4 text-center">{item.icon}</span>}
+              {item.icon && <span className="text-[var(--c-text3)] w-4 text-center">{item.icon}</span>}
               {item.label}
             </span>
-            {item.shortcut && <span className="ml-8 text-xs text-gray-500">{item.shortcut}</span>}
+            {item.shortcut && <span className="ml-8 text-xs text-[var(--c-text3)]">{item.shortcut}</span>}
           </button>
         );
       })}
@@ -69,16 +69,16 @@ function MenuRow({ item, onClose }: { item: MenuItem; onClose: () => void }) {
       onMouseLeave={() => setOpen(false)}
       onClick={() => { if (!item.disabled && item.action) { item.action(); onClose(); } }}
       className={`w-full flex items-center justify-between px-3 py-1 text-left transition-colors ${
-        item.disabled ? 'text-gray-600 cursor-default' : 'text-gray-200 hover:bg-gray-600 cursor-pointer'
+        item.disabled ? 'text-[var(--c-text4)] cursor-default' : 'text-[var(--c-text2)] hover:bg-[var(--c-bg4)] cursor-pointer'
       }`}
     >
       <span className="flex items-center gap-2">
-        {item.icon && <span className="text-gray-400 w-4 text-center">{item.icon}</span>}
+        {item.icon && <span className="text-[var(--c-text3)] w-4 text-center">{item.icon}</span>}
         {item.label}
       </span>
       <span className="ml-8 flex items-center gap-1">
-        {item.shortcut && <span className="text-xs text-gray-500">{item.shortcut}</span>}
-        {item.submenu && <span className="text-gray-400 text-xs">▶</span>}
+        {item.shortcut && <span className="text-xs text-[var(--c-text3)]">{item.shortcut}</span>}
+        {item.submenu && <span className="text-[var(--c-text3)] text-xs">▶</span>}
       </span>
       {open && item.submenu && rowRef.current && (
         <SubMenu items={item.submenu} parentRect={rowRef.current.getBoundingClientRect()} onClose={onClose} />
@@ -112,12 +112,12 @@ export function ContextMenu({ x, y, items, onClose }: Props) {
   return (
     <div
       ref={ref}
-      className="fixed z-50 min-w-[200px] rounded shadow-2xl border border-gray-600 bg-[#2b2b2b] py-1 text-sm select-none"
+      className="fixed z-50 min-w-[200px] rounded shadow-2xl border border-[var(--c-border2)] bg-[var(--c-bg2)] py-1 text-sm select-none"
       style={{ left, top }}
       onContextMenu={e => e.preventDefault()}
     >
       {items.map((item, i) => {
-        if ('separator' in item) return <div key={i} className="my-1 border-t border-gray-600" />;
+        if ('separator' in item) return <div key={i} className="my-1 border-t border-[var(--c-border2)]" />;
         return <MenuRow key={i} item={item} onClose={onClose} />;
       })}
     </div>

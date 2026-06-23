@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+﻿import { useState, useRef } from 'react';
 import { startDrag } from '../../hooks/useDragResize';
 import { useCanvasStore } from '../../store/canvasStore';
 import { FenceProperties } from '../panels/FenceProperties';
@@ -41,10 +41,10 @@ export function PropertiesPanel() {
   // ── Collapsed strip ───────────────────────────────────────────────────────
   if (collapsed) {
     return (
-      <div className="flex flex-col items-center bg-gray-800 border-l border-gray-700 shrink-0 py-2 gap-2" style={{ width: 28 }}>
+      <div className="flex flex-col items-center bg-[var(--c-bg2)] border-l border-[var(--c-border1)] shrink-0 py-2 gap-2" style={{ width: 28 }}>
         <button
           onClick={() => setCollapsed(false)}
-          className="text-gray-400 hover:text-amber-400 transition-colors"
+          className="text-[var(--c-text3)] hover:text-[var(--c-accent)] transition-colors"
           title="Expand panel"
         >
           ◂
@@ -54,19 +54,19 @@ export function PropertiesPanel() {
   }
 
   return (
-    <div ref={divRef} style={{ width }} className="bg-gray-800 border-l border-gray-700 flex flex-col shrink-0 text-white overflow-hidden relative">
+    <div ref={divRef} style={{ width }} className="bg-[var(--c-bg2)] border-l border-[var(--c-border1)] flex flex-col shrink-0 text-[var(--c-text1)] overflow-hidden relative">
       {/* Drag handle — left edge */}
       <div
         onMouseDown={onMouseDown}
-        className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-amber-400/60 transition-colors z-10"
+        className="absolute left-0 top-0 bottom-0 w-1 cursor-col-resize hover:bg-[var(--c-a-handle)] transition-colors z-10"
         title="Drag to resize"
       />
 
       {/* Tab bar + collapse button */}
-      <div className="flex border-b border-gray-700 shrink-0">
+      <div className="flex border-b border-[var(--c-border1)] shrink-0">
         <button
           onClick={() => setCollapsed(true)}
-          className="px-2 text-gray-500 hover:text-amber-400 transition-colors text-xs"
+          className="px-2 text-[var(--c-text3)] hover:text-[var(--c-accent)] transition-colors text-xs"
           title="Collapse panel"
         >
           ▸
@@ -76,10 +76,10 @@ export function PropertiesPanel() {
             key={t}
             onClick={() => setTab(t)}
             className={`flex-1 py-2 text-[11px] font-semibold uppercase tracking-wide transition-colors ${
-              tab === t ? 'bg-gray-700 text-amber-400' : 'text-gray-400 hover:text-gray-200'
+              tab === t ? 'bg-[var(--c-bg3)] text-[var(--c-accent)]' : 'text-[var(--c-text3)] hover:text-[var(--c-text2)]'
             }`}
           >
-            {t === 'properties' ? 'Properties' : 'Materials'}
+            {t === 'properties' ? 'Properties' : 'Line Items'}
           </button>
         ))}
       </div>
@@ -92,8 +92,8 @@ export function PropertiesPanel() {
           <>
             {(!selectedId || !selectedType) && (
               <div className="p-4">
-                <p className="text-xs text-gray-500 uppercase tracking-wide mb-2">Properties</p>
-                <p className="text-xs text-gray-600">Select an element to see its properties.</p>
+                <p className="text-xs text-[var(--c-text3)] uppercase tracking-wide mb-2">Properties</p>
+                <p className="text-xs text-[var(--c-text4)]">Select an element to see its properties.</p>
               </div>
             )}
             {selectedType === 'fence' && <FenceProperties fenceId={selectedId!} />}

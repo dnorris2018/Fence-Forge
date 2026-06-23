@@ -1,4 +1,4 @@
-import { useCanvasStore } from '../../store/canvasStore';
+﻿import { useCanvasStore } from '../../store/canvasStore';
 import { useHistory } from '../../hooks/useHistory';
 import { HOUSE_STYLES, HOUSE_STYLE_LABELS } from '../../constants/houseShapes';
 import type { HouseStyle } from '../../constants/houseShapes';
@@ -66,11 +66,11 @@ export function HouseProperties({ objectId }: Props) {
 
   return (
     <div className="p-4 flex flex-col gap-4">
-      <p className="text-xs text-gray-400 uppercase tracking-wide">House</p>
+      <p className="text-xs text-[var(--c-text3)] uppercase tracking-wide">House</p>
 
       {/* Shape style picker */}
       <div className="flex flex-col gap-1">
-        <p className="text-xs text-gray-400">Shape</p>
+        <p className="text-xs text-[var(--c-text3)]">Shape</p>
         <div className="grid grid-cols-3 gap-1">
           {HOUSE_STYLES.map(s => (
             <button
@@ -79,8 +79,8 @@ export function HouseProperties({ objectId }: Props) {
               title={HOUSE_STYLE_LABELS[s]}
               className={`flex flex-col items-center gap-0.5 py-1.5 rounded text-xs transition-colors ${
                 style === s
-                  ? 'bg-amber-700 text-white'
-                  : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+                  ? 'bg-emerald-700 text-[var(--c-text1)]'
+                  : 'bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] text-[var(--c-text2)]'
               }`}
             >
               <ShapeIcon style={s} />
@@ -92,13 +92,13 @@ export function HouseProperties({ objectId }: Props) {
 
       {/* Flip */}
       <div className="flex flex-col gap-1">
-        <p className="text-xs text-gray-400">Direction</p>
+        <p className="text-xs text-[var(--c-text3)]">Direction</p>
         <button
           onClick={toggleFlip}
           className={`py-1.5 rounded text-xs transition-colors flex items-center justify-center gap-1.5 ${
             flipX
-              ? 'bg-amber-700 text-white'
-              : 'bg-gray-700 hover:bg-gray-600 text-gray-300'
+              ? 'bg-emerald-700 text-[var(--c-text1)]'
+              : 'bg-[var(--c-bg3)] hover:bg-[var(--c-bg4)] text-[var(--c-text2)]'
           }`}
         >
           <ShapeIcon style={style} flipX={flipX} />
@@ -108,24 +108,24 @@ export function HouseProperties({ objectId }: Props) {
 
       {/* Size */}
       <div className="flex flex-col gap-1">
-        <p className="text-xs text-gray-400">Size (ft)</p>
+        <p className="text-xs text-[var(--c-text3)]">Size (ft)</p>
         <div className="flex gap-2">
           <div className="flex flex-col gap-0.5 flex-1">
-            <label className="text-[10px] text-gray-500">Width</label>
+            <label className="text-[10px] text-[var(--c-text3)]">Width</label>
             <input
               type="number" min={5} step={1}
               value={wFt}
               onChange={e => setSize(Number(e.target.value), hFt)}
-              className="w-full bg-gray-700 text-gray-200 text-xs rounded px-2 py-1 border border-gray-600 focus:outline-none focus:border-amber-500"
+              className="w-full bg-[var(--c-bg3)] text-[var(--c-text2)] text-xs rounded px-2 py-1 border border-[var(--c-border2)] focus:outline-none focus:border-emerald-500"
             />
           </div>
           <div className="flex flex-col gap-0.5 flex-1">
-            <label className="text-[10px] text-gray-500">Depth</label>
+            <label className="text-[10px] text-[var(--c-text3)]">Depth</label>
             <input
               type="number" min={5} step={1}
               value={hFt}
               onChange={e => setSize(wFt, Number(e.target.value))}
-              className="w-full bg-gray-700 text-gray-200 text-xs rounded px-2 py-1 border border-gray-600 focus:outline-none focus:border-amber-500"
+              className="w-full bg-[var(--c-bg3)] text-[var(--c-text2)] text-xs rounded px-2 py-1 border border-[var(--c-border2)] focus:outline-none focus:border-emerald-500"
             />
           </div>
         </div>
@@ -133,7 +133,7 @@ export function HouseProperties({ objectId }: Props) {
 
       <button
         onClick={handleDelete}
-        className="mt-auto py-1 px-3 rounded text-xs bg-red-800 hover:bg-red-700 text-white transition-colors"
+        className="mt-auto py-1 px-3 rounded text-xs bg-red-800 hover:bg-red-700 text-[var(--c-text1)] transition-colors"
       >
         Delete House
       </button>
